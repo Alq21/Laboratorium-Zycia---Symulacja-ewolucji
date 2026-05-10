@@ -1,12 +1,12 @@
 #include "entity.h"
 
-Entity::Entity(Position pos, Color col) : _position(pos), _color(col) {
+Entity::Entity(Position pos, QColor col) : position(pos), color(col) {
 }
 
 Position Entity::getPosition()  {
-    return _position;
+    return position;
 }
 
-Color Entity::getColor() {
-    return _color;
+QColor Entity::getColor() {
+    return color;
 }

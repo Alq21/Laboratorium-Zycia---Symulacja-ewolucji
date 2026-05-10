@@ -1,34 +1,20 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+#include "position.h"
+#include <QColor>
 
-struct Position
-{   int x;
-    int y;
-
-};
-
-struct Color {
-    int r, g, b;
-
-
-    Color(int r = 255, int g = 255, int b = 255) : r(r), g(g), b(b) {}
-};
-
-class Entity
-
-{
+class Entity {
 protected:
-    Position _position;
-    Color _color;
+    Position position;
+    QColor color;
+
 public:
-    Entity(Position pos, Color col);
+    Entity(Position pos, QColor col) : position(pos), color(col) {}
+    virtual ~Entity() = default;
 
-    Position getPosition();
-   Color getColor();
+    Position getPosition() const { return position; }
+    QColor getColor() const { return color; }
 };
-
-
-
 
 #endif // ENTITY_H
