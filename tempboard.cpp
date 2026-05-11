@@ -22,10 +22,10 @@ void TempBoard::paintEvent(QPaintEvent *event) {
     for (Entity* entity : entities) {
         if (entity != nullptr) {
 
-            Color logicColor = entity->getColor();
+            QColor logicColor = entity->getColor();
 
 
-            QColor qtColor(logicColor.r, logicColor.g, logicColor.b);
+           QColor qtColor(logicColor.red(), logicColor.green(), logicColor.blue());
 
             painter.setBrush(qtColor);
             painter.setPen(Qt::NoPen);

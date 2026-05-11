@@ -10,11 +10,11 @@ protected:
     QColor color;
 
 public:
-    Entity(Position pos, QColor col) : position(pos), color(col) {}
+    Entity(Position pos, QColor col) ;
     virtual ~Entity() = default;
 
-    Position getPosition() const { return position; }
-    QColor getColor() const { return color; }
+    Position getPosition() const;
+    QColor getColor() const ;
 };
 
 #endif // ENTITY_H
