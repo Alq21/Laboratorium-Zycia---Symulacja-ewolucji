@@ -1,12 +1,14 @@
-#include "tempboard.h"
+#include "TempBoard.h"
 #include <QPainter>
 
-TempBoard::TempBoard(QWidget *parent) : QWidget(parent), tileSize(10) {
+TempBoard::TempBoard(QWidget *parent) : QWidget(parent) {
+
     setMinimumSize(400, 400);
 }
 
 void TempBoard::setEntities(const std::vector<Entity*>& newEntities) {
     entities = newEntities;
+
     update();
 }
 
@@ -16,9 +18,13 @@ void TempBoard::paintEvent(QPaintEvent *event) {
 
     painter.fillRect(rect(), QColor(30, 30, 30));
 
+
     for (Entity* entity : entities) {
         if (entity != nullptr) {
+
             Color logicColor = entity->getColor();
+
+
             QColor qtColor(logicColor.r, logicColor.g, logicColor.b);
 
             painter.setBrush(qtColor);
@@ -27,5 +33,5 @@ void TempBoard::paintEvent(QPaintEvent *event) {
             Position pos = entity->getPosition();
             painter.drawEllipse(pos.x * tileSize, pos.y * tileSize, tileSize, tileSize);
         }
+        }
     }
-}

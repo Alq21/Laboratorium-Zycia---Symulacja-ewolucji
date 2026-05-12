@@ -4,7 +4,7 @@
 
 class PoisonTile : public Tile {
 public:
-    PoisonTile(Position pos); // Czerwony kolor
+    PoisonTile(Position pos) : Tile(pos, QColor(200, 0, 0)) {} // Czerwony kolor
 
     void applyEffect(Organism* organism) override;
 };
