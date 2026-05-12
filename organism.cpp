@@ -1,18 +1,12 @@
 #include "Organism.h"
 #include "World.h"
-#include "entity.h"
+#include <stdlib.h>
 #include "tile.h"
 
-Organism::Organism(Position pos, QColor col, int energy, int size, int speed, int maxAP)
-    : Entity(pos, col),
-    energy(energy),
-    isAlive(true),
-    size(size),
-    speed(speed),
-    actionPoints(maxAP),
-    maxActionPoints(maxAP),
-    plannedPosition(pos)
-{}
+Organism::Organism(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen)
+    : Entity(pos, col), energy(startEnergy), maxEnergy(maxEn), isAlive(true), size(size), speed(speed),
+    actionPoints(maxAP), maxActionPoints(maxAP), plannedPosition(pos), generation(gen) {
+}
 
 void Organism::setEnergy(int newEnergy) {
     energy = newEnergy;
@@ -24,6 +18,8 @@ void Organism::setEnergy(int newEnergy) {
 
 void Organism::die() {
     isAlive = false;
+    energy=0;
+
 }
 
 void Organism::onTick(World* world) {
@@ -38,30 +34,53 @@ void Organism::onTick(World* world) {
     actionPoints = maxActionPoints;
 }
 
+
+
+void Organism::planMove(World* world) {
+    if (!isAlive || actionPoints <= 0) return;
+
+    // Najprostsza implementacja: zaplanuj ruch w losowym kierunku
+    // W drapieżniku (Predator) NADPISZESZ tę funkcję, by szukała jedzenia!
+
+    int newX = position.x + (rand() % 3 - 1);
+    int newY = position.y + (rand() % 3 - 1);
+
+    plannedPosition = Position(newX, newY);}
+
 void Organism::onInteract(Entity* other) {
-    // Domyślnie brak interakcji, nadpiszą to Predator/Producer
+
 }
 
-//Fajnie byłoby uzależnić koszt rozmnażania się od cech bakterii (np. większa=więcej energii)
+
 bool Organism::canReproduce() const {
     // Przykładowy warunek: może się rozmnożyć, jeśli ma dużo energii i żyje
     return isAlive && energy > 50;
 }
 
 void Organism::executeMovement(World* world) {
-    if (!isAlive || actionPoints <= 0) return;
+    if (!isAlive || actionPoints <= 0) {return;}
+Tile* targetTile = world->getTile(plannedPosition);
+    if (targetTile == nullptr) {
+        plannedPosition = position; // Anulujemy plan (zostajemy w miejscu)
+        return;
+    }
 
     if (position.x != plannedPosition.x || position.y != plannedPosition.y) {
-        // Tutaj mogłaby wejść logika kosztu PA w zależności od dystansu
-        // Na razie proste przemieszczenie:
         position = plannedPosition;
-        Tile* currentTile = world->getTile(position);
-        if (currentTile) {
-            currentTile->applyEffect(this);
-        }
+        actionPoints--;
+    }
+
+
+}
+int Organism::getGeneration() const {
+    return generation;
+}
+void Organism::setEnergy(double newEnergy) {
+    energy = newEnergy;
+    if (energy <= 0.0) {
+        die();
     }
 }
-
 bool Organism::getIsAlive() const {
     return isAlive;
 }

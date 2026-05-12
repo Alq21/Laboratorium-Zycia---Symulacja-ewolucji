@@ -1,7 +1,8 @@
 #include "abundanttile.h"
 #include "organism.h"
+\
 
-AbundantTile::AbundantTile(Position pos) : Tile(pos, QColor(0, 255, 100)) {}
+AbundantTile::AbundantTile(Position pos) : Tile(pos, Color(0, 255, 100)) {}
 
 void AbundantTile::applyEffect(Organism* organism) {
 }

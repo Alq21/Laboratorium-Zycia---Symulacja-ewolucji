@@ -103,3 +103,4 @@ void World::removeDead() {
         organisms.end()
         );
 }
+World::~World() = default;

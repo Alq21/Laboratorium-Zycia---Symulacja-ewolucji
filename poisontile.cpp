@@ -1,7 +1,7 @@
 #include "poisontile.h"
 #include "organism.h"
 
-PoisonTile::PoisonTile(Position pos) : Tile(pos, QColor(200, 0, 0)) {} // Czerwony
+PoisonTile::PoisonTile(Position pos) : Tile(pos, Color(200, 0, 0)) {} // Czerwony
 
 void PoisonTile::applyEffect(Organism* organism) {
     if (organism && organism->getIsAlive()) {

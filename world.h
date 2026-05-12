@@ -25,7 +25,7 @@ private:
     void generateMap(const MapConfig& config);
 public:
     World(int w, int h, MapConfig config = MapConfig());
-    ~World() = default;
+    ~World() ;
 
     // Metody zarządzania płytkami:
     Tile* getTile(Position p) const;

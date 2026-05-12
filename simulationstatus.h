@@ -16,7 +16,7 @@ private:
     SimulationState state;
 
 public:
-    SimulationStatus() : state(SimulationState::INITIALIZING) {}
+    SimulationStatus();
 
     void setState(SimulationState s) { state = s; }
     SimulationState getState() const { return state; }

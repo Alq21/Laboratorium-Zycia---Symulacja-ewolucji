@@ -1,3 +1,3 @@
 #include "simulationstatus.h"
 
-simulationstatus::simulationstatus() {}
+SimulationStatus::SimulationStatus() : state(SimulationState::INITIALIZING) {}
