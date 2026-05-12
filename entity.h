@@ -2,24 +2,19 @@
 #define ENTITY_H
 
 #include "position.h"
-
-
-struct Color {
-    int r, g, b;
-    Color(int r = 255, int g = 255, int b = 255) : r(r), g(g), b(b) {}
-};
+#include <QColor>
 
 class Entity {
 protected:
     Position position;
-    Color color;
+    QColor color;
 
 public:
-    Entity(Position pos, Color col) ;
+    Entity(Position pos, QColor col) : position(pos), color(col) {}
     virtual ~Entity() = default;
 
-    Position getPosition() const;
-    Color getColor() const ;
+    Position getPosition() const { return position; }
+    QColor getColor() const { return color; }
 };
 
 #endif // ENTITY_H

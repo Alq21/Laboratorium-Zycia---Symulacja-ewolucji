@@ -2,31 +2,27 @@
 #define ORGANISM_H
 
 #include "entity.h"
+#include <QColor>
 #include <memory>
-
 
 class World;
 
 class Organism : public Entity {
 protected:
     int energy;
-    double maxEnergy;
     bool isAlive;
     int size;
     int speed;
     int actionPoints;
     int maxActionPoints;
     Position plannedPosition;
-    int generation;
 
 public:
-   Organism(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen);
+    Organism(Position pos, QColor col, int energy, int size, int speed, int maxAP);
     virtual ~Organism() = default;
 
-    virtual void onTick(World* world) =0;
-
-
-    virtual void planMove(World* world);
+    virtual void onTick(World* world);
+    virtual void planMove(World* world) = 0;
     virtual void executeMovement(World* world);
     void setEnergy(int newEnergy);
     void die();
@@ -38,8 +34,6 @@ public:
     // Gettery:
     bool getIsAlive() const;
     double getEnergy() const;
-    void setEnergy(double newEnergy);
-    int getGeneration() const;
 };
 
-#endif // ORGANISM_HSSS
+#endif // ORGANISM_H
