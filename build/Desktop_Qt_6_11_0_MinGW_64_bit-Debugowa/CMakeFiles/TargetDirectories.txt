@@ -1,9 +1,0 @@
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/LifeLabolatory.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/edit_cache.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/rebuild_cache.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/list_install_components.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/install.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/install/local.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/install/strip.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/LifeLabolatory_autogen_timestamp_deps.dir
-C:/Users/alicj/Desktop/Ala/Studia/Repos/LifeLabolatory/build/Desktop_Qt_6_11_0_MinGW_64_bit-Debugowa/CMakeFiles/LifeLabolatory_autogen.dir

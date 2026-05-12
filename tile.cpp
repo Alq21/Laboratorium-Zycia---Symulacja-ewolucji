@@ -1,3 +1,3 @@
 #include "tile.h"
 
-tile::tile() {}
+Tile::Tile(Position pos, Color col) : Entity(pos, col) {}

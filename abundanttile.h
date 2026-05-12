@@ -4,9 +4,11 @@
 
 class AbundantTile : public Tile {
 public:
-    AbundantTile(Position pos) : Tile(pos, QColor(0, 200, 0)) {} //Zielony kolor
+    AbundantTile(Position pos);
+    //Zielony kolor
 
     void applyEffect(Organism* organism) override;
+    double getProductionBonus() const;
 };
 
 #endif // ABUNDANTTILE_H

@@ -1,6 +1,6 @@
 #include "impassabletile.h"
 
-ImpassableTile::ImpassableTile(Position pos) : Tile(pos, QColor(50, 50, 50)) {} // Szary
+ImpassableTile::ImpassableTile(Position pos) : Tile(pos, Color(50, 50, 50)) {} // Szary
 
 bool ImpassableTile::blockMovement() const {
     return true;

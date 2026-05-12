@@ -2,9 +2,9 @@
 #include "world.h"
 #include "organism.h"
 #include "tile.h"
-#include "statmanager.h"
-#include "producer.h"
-#include "predator.h"
+// #include "statmanager.h"
+// #include "producer.h"
+// #include "predator.h"
 
 SimEngine::SimEngine(World* w, StatManager* stats)
     : world(w),
@@ -26,7 +26,8 @@ void SimEngine::step()
     processTileEffects();
     processEnergy();
     processReproduction();
-    cleanup();
+    //jak dodasz stat manager co nie był dodany to sobie odkomentujesz
+    // cleanup();
 
     currentTick++;
 }
@@ -123,26 +124,26 @@ void SimEngine::processReproduction()
     }
 }
 
-void SimEngine::cleanup()
-{
-    world->removeDead();
+// void SimEngine::cleanup()
+// {
+//     world->removeDead();
 
-    if(statistics)
-    {
-        int predatorCount = 0;
-        int producerCount = 0;
+//     if(statistics)
+//     {
+//         int predatorCount = 0;
+//         int producerCount = 0;
 
-        for(const auto& organism : world->getOrganisms())
-        {
-            if(dynamic_cast<Predator*>(organism.get()))
-                predatorCount++;
-            else if(dynamic_cast<Producer*>(organism.get()))
-                producerCount++;
-        }
+//         for(const auto& organism : world->getOrganisms())
+//         {
+//             if(dynamic_cast<predator*>(organism.get()))
+//                 predatorCount++;
+//             else if(dynamic_cast<producer*>(organism.get()))
+//                 producerCount++;
+//         }
 
-        statistics->addSnapshot(predatorCount, producerCount);
-    }
-}
+//         statistics->addSnapshot(predatorCount, producerCount);
+//     }
+// }
 
 World* SimEngine::getWorld() const { return world; }
 
