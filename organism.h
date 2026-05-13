@@ -40,6 +40,8 @@ public:
     double getEnergy() const;
     void setEnergy(double newEnergy);
     int getGeneration() const;
+    int getSize() const;
+    int getSpeed() const;
 };
 
 #endif // ORGANISM_HSSS

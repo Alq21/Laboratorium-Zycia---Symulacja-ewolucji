@@ -1,61 +1,41 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "predator.h"
-#include <vector>
-#include <memory>
+#include "simulationapp.h"
+#include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , board(nullptr)
-    , world(nullptr)
-    , engine(nullptr)
 {
     ui->setupUi(this);
-
-
     board = new TempBoard(this);
-
     board->setGeometry(10, 50, 500, 500);
-
-
-    world = new World(50, 50);
-    engine = new SimEngine(world, nullptr); // StatManager narazie nullptr
-
-
-    std::unique_ptr<Organism> testBug = std::make_unique<Predator>(
-        Position{5, 5},
-        Color{255, 0, 0},
-        100.0, // startEnergy
-        200.0, // maxEnergy
-        1,     // size
-        1,     // speed
-        1,     // maxAP
-        1,     // generation
-        5      // visionRange
-        );
-    world->addOrganism(std::move(testBug));
-
-    std::vector<Entity*> entitiesToDraw;
-    for(const auto& org : world->getOrganisms()) {
-        entitiesToDraw.push_back(org.get());
-    }
-    board->setEntities(entitiesToDraw);
+    simApp = new SimulationApp(this);
+    connect(simApp, &SimulationApp::tickCompleted,
+            this, [this](long tick) {
+                std::vector<Entity*> entities = simApp->collectEntities();
+                qDebug() << "Tick:" << tick << "Entities:" << entities.size();
+                board->setEntities(entities);
+            });
+    connect(simApp, &SimulationApp::errorOccurred,
+            this, [](const QString& msg) { qDebug() << "SimError:" << msg; });
+    if (simApp->loadFromFile(QString(SOURCE_DIR) + "/example_config.json"))
+        simApp->start();
 
     resize(600, 600);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
-
-    delete engine;
-    delete world;
 }
 
-void MainWindow::on_StepButton_clicked()
-{}
-void MainWindow::on_pushButton_clicked()
-{
+void MainWindow::on_StepButton_clicked() {
+    simApp->pause();
+}
 
+void MainWindow::on_pushButton_clicked() {
+    if (simApp->isPaused())
+        simApp->resume();
+    else
+        simApp->pause();
 }

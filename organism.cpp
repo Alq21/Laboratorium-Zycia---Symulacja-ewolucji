@@ -1,5 +1,5 @@
-#include "Organism.h"
-#include "World.h"
+#include "organism.h"
+#include "world.h"
 #include <stdlib.h>
 #include "tile.h"
 
@@ -87,4 +87,12 @@ bool Organism::getIsAlive() const {
 
 double Organism::getEnergy() const {
     return energy;
+}
+
+int Organism::getSize() const {
+    return size;
+}
+
+int Organism::getSpeed() const {
+    return speed;
 }

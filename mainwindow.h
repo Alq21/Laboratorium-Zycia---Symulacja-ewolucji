@@ -2,9 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "simulationapp.h"
 #include "tempboard.h"
-#include "simengine.h"
-#include "world.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,18 +13,17 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget* parent = nullptr);
+    ~MainWindow() override;
 
 private slots:
     void on_StepButton_clicked();
     void on_pushButton_clicked();
 
 private:
-    Ui::MainWindow *ui;
-    TempBoard *board;
-    World *world;
-    SimEngine *engine;
+    Ui::MainWindow* ui;
+    SimulationApp* simApp = nullptr;
+    TempBoard* board = nullptr;
 };
 
 #endif // MAINWINDOW_H

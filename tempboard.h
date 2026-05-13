@@ -5,6 +5,8 @@
 #include <vector>
 #include "entity.h"
 
+class Tile;
+
 class TempBoard : public QWidget {
     Q_OBJECT
 public:
@@ -16,7 +18,7 @@ protected:
 
 private:
     std::vector<Entity*> entities;
-    int tileSize; // Rozmiar pojedynczej kratki/bakterii
+    int tileSize;
 };
 
 #endif // TEMPBOARD_H
