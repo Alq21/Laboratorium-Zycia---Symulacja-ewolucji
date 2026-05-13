@@ -35,35 +35,44 @@ void Producer::onInteract(Entity* other) {
     // Producenci nie atakują innych jednostek, ignorują interakcje
 }
 
-bool Producer::canReproduce() const {
-    return isAlive && (energy >= reproductionThreshold);
-}
 
 std::unique_ptr<Organism> Producer::reproduce() {
     if (!canReproduce()) {
         return nullptr;
     }
 
-    energy -= (reproductionThreshold / 2.0);
+    double energyGivenToChild = energy / 2.0;
+    setEnergy(energy - energyGivenToChild);
 
-    int childGeneration = generation + 1;
+    int childGen = generation + 1;
     Position childPos = {position.x + 1, position.y + 1};
 
-    Color childColor = color;
     double childMaxEn = maxEnergy;
     int childSize = size;
+    int childSpeed = speed;
+    Color childColor = color;
 
-    if (childGeneration % 10 == 0) {
-        childMaxEn += 10.0;
-        childSize += 1;
-        // std::max z biblioteki <algorithm> dba o to, by kolor nie spadł poniżej zera
-        childColor = Color{color.r, std::max(0, color.g - 20), color.b};
+    // Mutacja co 10 pokoleń
+    if (childGen % 10 == 0) {
+        childMaxEn += 15.0;
+        childSize += 2;
+        childSpeed += 1;
+        childColor.r = std::min(255, childColor.r + 30);
     } else {
-        // std::min zapobiega przekroczeniu wartości 255
-        childColor.g = std::min(255, color.g + 2);
+        childColor.g = std::max(50, childColor.g - 5);
     }
 
-    return std::make_unique<Producer>(childPos, childColor, childMaxEn * 0.4, childMaxEn, childSize, speed, maxActionPoints, childGeneration, preferredTemperature);
+    return std::make_unique<Producer>(
+        childPos,
+        childColor,
+        energyGivenToChild,
+        childMaxEn,
+        childSize,
+        childSpeed,
+        maxActionPoints,
+        childGen,
+        preferredTemperature
+        );
 }
 void Producer::photosynthesize(double amount) {
     if (isAlive) {

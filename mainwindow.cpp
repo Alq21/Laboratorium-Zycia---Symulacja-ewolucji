@@ -1,46 +1,68 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "predator.h"
+#include "producer.h"
+#include "thermophile.h"
+#include "cryophile.h"
+#include "environmentparameters.h"
+#include "tile.h"
 #include <vector>
 #include <memory>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , board(nullptr)
     , world(nullptr)
     , engine(nullptr)
+    , timer(new QTimer(this))
 {
     ui->setupUi(this);
 
 
-    board = new TempBoard(this);
-
-    board->setGeometry(10, 50, 500, 500);
+    world = new World(25, 25);
 
 
-    world = new World(50, 50);
-    engine = new SimEngine(world, nullptr); // StatManager narazie nullptr
+    EnvironmentParameters globalParams(20.0, 50.0, 50.0);
+    world->setGlobalParameters(globalParams);
+
+    for (int x = 0; x < 25; ++x) {
+        for (int y = 0; y < 25; ++y) {
+            Tile* tile = world->getTile(Position{x, y});
+            if (tile != nullptr) {
+                if (x < 8 && y < 8) {
+
+                    tile->getLocalModifiers().modifyParameter("temperature", -30.0);
+                } else if (x > 16 && y > 16) {
+                    tile->getLocalModifiers().modifyParameter("temperature", 30.0);
+                }
+            }
+        }
+    }
 
 
-    std::unique_ptr<Organism> testBug = std::make_unique<Predator>(
-        Position{5, 5},
-        Color{255, 0, 0},
-        100.0, // startEnergy
-        200.0, // maxEnergy
-        1,     // size
-        1,     // speed
-        1,     // maxAP
-        1,     // generation
-        5      // visionRange
-        );
-    world->addOrganism(std::move(testBug));
+    world->populate(10, 2);
+
+
+    world->addOrganism(std::make_unique<Thermophile>(
+        Position{12, 12}, Color{200, 50, 50}, 100.0, 150.0, 12, 2, 5, 1));
+
+    world->addOrganism(std::make_unique<Cryophile>(
+        Position{13, 13}, Color{50, 50, 200}, 100.0, 150.0, 12, 2, 5, 1));
+
+
+    engine = new SimEngine(world, nullptr);
+    engine->resume();
+
+
+    connect(timer, &QTimer::timeout, this, &MainWindow::performStep);
+
 
     std::vector<Entity*> entitiesToDraw;
     for(const auto& org : world->getOrganisms()) {
         entitiesToDraw.push_back(org.get());
     }
-    board->setEntities(entitiesToDraw);
+
+
+    ui->boardWidget->setEntities(entitiesToDraw);
 
     resize(600, 600);
 }
@@ -48,14 +70,38 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-
     delete engine;
     delete world;
 }
 
-void MainWindow::on_StepButton_clicked()
-{}
+
+void MainWindow::performStep()
+{
+    if (engine) {
+        engine->step();
+
+        std::vector<Entity*> entitiesToDraw;
+        for(const auto& org : engine->getWorld()->getOrganisms()) {
+            entitiesToDraw.push_back(org.get());
+        }
+
+        ui->boardWidget->setEntities(entitiesToDraw);
+    }
+}
+
+
 void MainWindow::on_pushButton_clicked()
 {
+    performStep();
+}
 
+
+void MainWindow::on_startButton_clicked()
+{
+    timer->start(250);
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    timer->stop();
 }

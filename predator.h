@@ -11,7 +11,7 @@ private:
 public:
     Predator(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen, int vision);
 
-    void onTick(World* world) override;
+void onTick(World* world) override;
     void planMove(World* world) override;
     void onInteract(Entity* other) override;
 

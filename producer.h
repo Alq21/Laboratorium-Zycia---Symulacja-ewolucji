@@ -20,8 +20,8 @@ public:
     void planMove(World* world) override;
     void onInteract(Entity* other) override;
 
-    bool canReproduce() const override;
-    std::unique_ptr<Organism> reproduce() override;
+    // bool canReproduce() const override;
+    virtual std::unique_ptr<Organism> reproduce() override;
 
     void photosynthesize(double amount);
 

@@ -31,16 +31,9 @@ Position Predator::findNearestPrey(World* world) {
     return bestPos;
 }
 void Predator::onTick(World* world) {
-    if (!isAlive) {
-        return;
-    }
+    if (!isAlive) return;
 
-    energy -= 2.0;
-    actionPoints = maxActionPoints;
-
-    if (energy <= 0.0) {
-        die();
-    }
+    Organism::onTick(world);
 }
 
 void Predator::planMove(World* world) {
@@ -76,14 +69,9 @@ void Predator::onInteract(Entity* other) {
 
 void Predator::hunt(Organism* target) {
     if (target && target->getIsAlive()) {
-        double gainedEnergy = target->getEnergy();
-
-        setEnergy(energy + gainedEnergy);
-        if (energy > maxEnergy) {
-            energy = maxEnergy;
-        }
-
-        target->die();
+        double stolenEnergy = target->getEnergy() / 2.0;
+        target->setEnergy(target->getEnergy() - stolenEnergy);
+        this->setEnergy(this->energy + stolenEnergy);
     }
 }
 
@@ -96,8 +84,37 @@ std::unique_ptr<Organism> Predator::reproduce() {
         return nullptr;
     }
 
-    energy -= 80.0;
+    double energyGivenToChild = energy / 2.0;
+    setEnergy(energy - energyGivenToChild);
+
+    int childGen = generation + 1;
     Position childPos = {position.x - 1, position.y - 1};
 
-    return std::make_unique<Predator>(childPos, Color{255, 0, 0}, 100.0, maxEnergy, size, speed, maxActionPoints, generation + 1, visionRange);
+    double childMaxEn = maxEnergy;
+    int childSize = size;
+    int childSpeed = speed;
+    int childVision = visionRange;
+    Color childColor = color;
+
+    if (childGen % 10 == 0) {
+        childMaxEn += 20.0;
+        childSize += 3;
+        childSpeed += 2;
+        childVision += 2;
+        childColor.b = std::min(255, childColor.b + 50);
+    } else {
+        childColor.r = std::max(100, childColor.r - 5);
+    }
+
+    return std::make_unique<Predator>(
+        childPos,
+        childColor,
+        energyGivenToChild,
+        childMaxEn,
+        childSize,
+        childSpeed,
+        maxActionPoints,
+        childGen,
+        childVision
+        );
 }

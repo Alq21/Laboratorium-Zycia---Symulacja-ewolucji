@@ -28,18 +28,20 @@ public:
 
     virtual void planMove(World* world);
     virtual void executeMovement(World* world);
-    void setEnergy(int newEnergy);
-    void die();
+
+
 
     virtual void onInteract(Entity* other);
     virtual bool canReproduce() const;
     virtual std::unique_ptr<Organism> reproduce() = 0;
-
+    void die();
     // Gettery:
     bool getIsAlive() const;
     double getEnergy() const;
     void setEnergy(double newEnergy);
     int getGeneration() const;
+    int getSize() const;
+    Color getColor() const;
 };
 
 #endif // ORGANISM_HSSS

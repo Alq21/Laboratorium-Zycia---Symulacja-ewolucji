@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include "environmentparameters.h"
 #include "position.h"
 
 class Tile;
@@ -23,6 +24,7 @@ private:
     std::vector<std::vector<std::unique_ptr<Tile>>> habitat;
     std::vector<std::unique_ptr<Organism>> organisms;
     void generateMap(const MapConfig& config);
+    EnvironmentParameters globalParameters;
 public:
     World(int w, int h, MapConfig config = MapConfig());
     ~World() ;
@@ -33,14 +35,19 @@ public:
     void addOrganism(std::unique_ptr<Organism> o);
     void removeDead();
     Organism* getOrganismAt(Position p) const;
+    //metoda do zaludnienia świata, potem chcielismy żeby to czytało z pliku wiec trzeba bedzie  udoskonalić
+    void populate(int numProducers, int numPredators);
 
-    // Gettery:
+
     int getWidth() const { return width; }
     int getHeight() const { return height; }
 
     const std::vector<std::unique_ptr<Organism>>& getOrganisms() const { return organisms; }
     World(const World&) = delete;
     World& operator=(const World&) = delete;
+    // dla parametrów srodowiska
+    void setGlobalParameters(EnvironmentParameters parameters);
+    EnvironmentParameters getCombinedParameters(Position pos) const;
 };
 
 #endif // WORLD_H

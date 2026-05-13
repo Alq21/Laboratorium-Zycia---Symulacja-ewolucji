@@ -4,6 +4,8 @@
 #include "abundanttile.h"
 #include "poisontile.h"
 #include "impassabletile.h"
+#include "predator.h"
+#include "producer.h"
 #include "tile.h"
 #include <cstdlib>
 #include <ctime>
@@ -64,6 +66,31 @@ void World::generateMap(const MapConfig& config) {
         }
     }
 }
+void World::populate(int numProducers, int numPredators) {
+    // Zaludniamy świat Producentami
+    for (int i = 0; i < numProducers; ++i) {
+        int randomX = std::rand() % width;
+        int randomY = std::rand() % height;
+        Position randomPos{randomX, randomY};
+
+        auto producer = std::make_unique<Producer>(
+            randomPos, Color{0, 255, 0}, 50.0, 100.0, 1, 1, 1, 1, 20.0
+            );
+        addOrganism(std::move(producer));
+    }
+
+    // Zaludniamy świat Drapieżnikami
+    for (int i = 0; i < numPredators; ++i) {
+        int randomX = std::rand() % width;
+        int randomY = std::rand() % height;
+        Position randomPos{randomX, randomY};
+
+        auto predator = std::make_unique<Predator>(
+            randomPos, Color{255, 0, 0}, 100.0, 200.0, 1, 1, 1, 1, 5
+            );
+        addOrganism(std::move(predator));
+    }
+}
 
 Tile* World::getTile(Position p) const {
         // Sprawdzanie czy współrzędne nie są poza mapą
@@ -102,5 +129,17 @@ void World::removeDead() {
         }),
         organisms.end()
         );
+}
+void World::setGlobalParameters(EnvironmentParameters parameters) {
+    globalParameters = parameters;
+}
+EnvironmentParameters World::getCombinedParameters(Position pos) const {
+    Tile* tile = getTile(pos);
+    if (tile != nullptr) {
+        // GLOBALNE + LOKALNE = RZECZYWISTE W
+        return globalParameters + tile->getLocalModifiers();
+    }
+    // Jeśli z jakiegoś powodu jesteśmy poza mapą, zwracamy tylko globalne
+    return globalParameters;
 }
 World::~World() = default;

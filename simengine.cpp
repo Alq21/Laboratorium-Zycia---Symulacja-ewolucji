@@ -26,9 +26,15 @@ void SimEngine::step()
     processTileEffects();
     processEnergy();
     processReproduction();
+    //potem usuniemy dla testów
+    for(auto& org : world->getOrganisms()) {
+        org->onTick(world);
+
+        org->setEnergy(org->getEnergy() + 5.0);
+    }
     //jak dodasz stat manager co nie był dodany to sobie odkomentujesz
     // cleanup();
-
+world->removeDead();
     currentTick++;
 }
 
