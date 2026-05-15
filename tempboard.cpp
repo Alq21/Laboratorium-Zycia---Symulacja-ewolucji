@@ -20,11 +20,10 @@ void TempBoard::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    std::cout << "\n=== PAINT EVENT CALLED ===" << std::endl;
     std::cout << "Total entities in vector: " << entities.size() << std::endl;
 
     // 1. Czyść tło
-    painter.fillRect(rect(), QColor(30, 30, 30));
+    painter.fillRect(rect(), QColor(60, 60, 60));
 
     if (entities.empty()) {
         painter.setPen(Qt::white);
@@ -39,11 +38,22 @@ void TempBoard::paintEvent(QPaintEvent *event)
         if (Tile* tile = dynamic_cast<Tile*>(entity)) {
             Color c = tile->getColor();
             Position pos = tile->getPosition();
-            painter.setBrush(QColor(c.r, c.g, c.b));
-            painter.setPen(Qt::NoPen);
-            painter.drawRect(pos.x * tileSize, pos.y * tileSize, tileSize, tileSize);
-        }
-    }
+
+            int x = pos.x * tileSize;
+            int y = pos.y * tileSize;
+
+            // Podstawowy gradient
+            QLinearGradient grad(x, y, x + tileSize, y + tileSize);
+            QColor base(c.r, c.g, c.b);
+            grad.setColorAt(0, base.lighter(115));
+            grad.setColorAt(1, base.darker(105));
+
+            painter.fillRect(x, y, tileSize, tileSize, grad);
+
+            // Cienka obwódka
+            painter.setPen(QPen(QColor(0, 0, 0, 40), 1));
+            painter.drawRect(x, y, tileSize, tileSize);
+        }}
     int organismCount = 0;
 
     for (Entity* entity : entities) {
