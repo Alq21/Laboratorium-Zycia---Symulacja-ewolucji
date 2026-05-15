@@ -66,16 +66,15 @@ void TempBoard::paintEvent(QPaintEvent *event)
                 currentSize
                 );
 
-            if (dynamic_cast<Predator*>(org)) {
-                painter.setPen(QPen(Qt::white, 1));
-                painter.setBrush(Qt::NoBrush);
-                painter.drawEllipse(
-                    pos.x * tileSize + offset,
-                    pos.y * tileSize + offset,
-                    currentSize,
-                    currentSize
-                    );
+            // if (dynamic_cast<Predator*>(org)) {
+            //     painter.setPen(QPen(Qt::white, 1));
+            //     painter.setBrush(Qt::NoBrush);
+            //     painter.drawEllipse(
+            //         pos.x * tileSize + offset,
+            //         pos.y * tileSize + offset,
+            //         currentSize,
+            //         currentSize
+            //         );
             }
         }
     }
-}

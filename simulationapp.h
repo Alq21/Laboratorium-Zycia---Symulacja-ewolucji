@@ -34,7 +34,7 @@ public:
     bool isRunning() const;
     bool isPaused()  const;
     long currentTick() const;
-
+void onTick();
     std::vector<Entity*> collectEntities() const;
 
     QString lastError() const { return error; }
@@ -48,8 +48,7 @@ signals:
     void simulationStopped();
     void errorOccurred(const QString& message);
 
-private slots:
-    void onTick();
+
 
 private:
     std::unique_ptr<World> world;

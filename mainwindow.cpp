@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QTimer>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -50,7 +51,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    if (simApp) simApp->resume();
+    if (!simApp->isRunning()) {
+        simApp->start();
+    } else if (simApp->isPaused()) {
+        simApp->resume();
+    }
 }
 
 void MainWindow::on_stopButton_clicked()
@@ -60,9 +65,13 @@ void MainWindow::on_stopButton_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    // Ręczny krok (jeśli simApp na to pozwala)
     if (simApp) {
-        simApp->resume();
-        QTimer::singleShot(50, simApp, &SimulationApp::pause);
-    }
+        simApp->onTick();}
+
+      // (const auto& org : engine->getWorld()->getOrganisms()) {
+      //       entitiesToDraw.push_back(org.get());
+      //   }        std::vector<Entity*> entitiesToDraw;
+      //   for
+
+      //   ui->boardWidget->setEntities(entitiesToDraw);
 }

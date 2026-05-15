@@ -29,7 +29,7 @@ void Organism::die() {
 void Organism::onTick(World* world) {
     if (!isAlive) return;
 
- setEnergy(energy - 10.0);
+ // setEnergy(energy - 10.0);
     if (energy <= 0) {
         die();
     }
@@ -63,12 +63,25 @@ bool Organism::canReproduce() const {
 void Organism::executeMovement(World* world) {
     if (!isAlive || actionPoints <= 0) return;
 
+    // Sprawdzamy czy ruch jest w granicach mapy
+    if (plannedPosition.x < 0 || plannedPosition.x >= world->getWidth() ||
+        plannedPosition.y < 0 || plannedPosition.y >= world->getHeight()) {
+        return; // Nie możemy wyjść poza mapę
+    }
+
+    // Sprawdzamy czy płytka jest przejezdna
+    Tile* targetTile = world->getTile(plannedPosition);
+    if (targetTile && !targetTile->isTraversable()) {
+        return; // Nie możemy wejść na nieprzejezdną płytkę
+    }
+
+    // Wykonujemy ruch jeśli pozycja się zmienia
     if (position.x != plannedPosition.x || position.y != plannedPosition.y) {
         position = plannedPosition;
         actionPoints--;
 
         // Koszt ruchu
-        setEnergy(energy - 1.0);
+        setEnergy(energy - 5.0);
     }
 }
 

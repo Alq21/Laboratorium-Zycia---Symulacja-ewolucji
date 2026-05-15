@@ -31,6 +31,10 @@ target_include_directories(LifeLabolatory PRIVATE
 )
 
 add_compile_definitions(SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+configure_file(${CMAKE_SOURCE_DIR}/example_config.json
+               ${CMAKE_BINARY_DIR}/example_config.json COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/improved_config.json
+               ${CMAKE_BINARY_DIR}/improved_config.json COPYONLY)
 
 target_link_libraries(LifeLabolatory PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 

@@ -1,0 +1,101 @@
+{
+  "world": {
+    "width": 80,
+    "height": 60,
+    "mapConfig": {
+      "baseNormalWeight": 100,
+      "baseAbundantWeight": 12,
+      "basePoisonWeight": 4,
+      "baseImpassableWeight": 5,
+      "clusterBonus": 150
+    }
+  },
+  "organisms": [
+    {
+      "type": "predator",
+      "x": 20, "y": 15,
+      "startEnergy": 120.0,
+      "maxEnergy": 300.0,
+      "size": 2,
+      "speed": 2,
+      "maxAP": 2,
+      "vision": 7
+    },
+    {
+      "type": "predator",
+      "x": 60, "y": 45,
+      "startEnergy": 100.0,
+      "maxEnergy": 280.0,
+      "size": 2,
+      "speed": 2,
+      "maxAP": 2,
+      "vision": 6
+    },
+    {
+      "type": "producer",
+      "x": 10, "y": 10,
+      "startEnergy": 80.0,
+      "maxEnergy": 200.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 40, "y": 30,
+      "startEnergy": 85.0,
+      "maxEnergy": 210.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 70, "y": 50,
+      "startEnergy": 90.0,
+      "maxEnergy": 205.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "thermophile",
+      "x": 15, "y": 45,
+      "startEnergy": 100.0,
+      "maxEnergy": 220.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1
+    },
+    {
+      "type": "thermophile",
+      "x": 55, "y": 20,
+      "startEnergy": 95.0,
+      "maxEnergy": 215.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1
+    },
+    {
+      "type": "cryophile",
+      "x": 35, "y": 10,
+      "startEnergy": 95.0,
+      "maxEnergy": 210.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1
+    },
+    {
+      "type": "cryophile",
+      "x": 65, "y": 35,
+      "startEnergy": 100.0,
+      "maxEnergy": 215.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1
+    }
+  ]
+}

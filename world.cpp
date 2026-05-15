@@ -10,6 +10,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <qdebug.h>
+#include <qlogging.h>
 
 
 World::World(int w, int h, MapConfig config) : width(w), height(h) {
@@ -106,11 +108,37 @@ void World::setTile(Position p, std::unique_ptr<Tile> newTile) {
     }
 }
 
-void World::addOrganism(std::unique_ptr<Organism> o) {
-    if (o) {
+
+
+    // Funkcja addOrganism - CAŁA NOWA WERSJA:
+    void World::addOrganism(std::unique_ptr<Organism> o) {
+        if (!o) {
+            qDebug() << "  ✗ Cannot add null organism";
+            return;
+        }
+
+        Position pos = o->getPosition();
+
+        // Walidacja granic mapy
+        if (pos.x < 0 || pos.x >= width || pos.y < 0 || pos.y >= height) {
+            qDebug() << "  ✗ Organism at (" << pos.x << "," << pos.y
+                     << ") is OUTSIDE map bounds (" << width << "x" << height << ")";
+            return;
+        }
+
+        // Sprawdź czy pozycja jest już zajęta
+        for (const auto& existing : organisms) {
+            if (existing->getPosition() == pos) {
+                qDebug() << "   WARNING: Position (" << pos.x << "," << pos.y
+                         << ") is already occupied! Organisms will overlap.";
+                break;
+            }
+        }
+
         organisms.push_back(std::move(o));
+        qDebug() << "  ✓ Added at (" << pos.x << "," << pos.y << ")";
     }
-}
+
 
 Organism* World::getOrganismAt(Position p) const {
     for (const auto& org : organisms) {

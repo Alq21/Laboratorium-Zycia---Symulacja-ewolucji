@@ -20,21 +20,14 @@ void SimEngine::step()
     if (status.getState() != SimulationState::RUNNING)
         return;
 
-    processMovementPlanning();
-    processMovementExecution();
-    processInteractions();
-    processTileEffects();
-    processEnergy();
-    processReproduction();
-    //potem usuniemy dla testów
-    for(auto& org : world->getOrganisms()) {
-        org->onTick(world);
-
-        org->setEnergy(org->getEnergy() + 5.0);
-    }
-    //jak dodasz stat manager co nie był dodany to sobie odkomentujesz
-    // cleanup();
-world->removeDead();
+    processEnergy();              // Najpierw energia i akcje
+    processMovementPlanning();    // Planowanie ruchu
+    processMovementExecution();   // Wykonanie ruchu
+    processInteractions();        // Interakcje (polowanie)
+    processTileEffects();         // Efekty płytek
+    processReproduction();        // Rozmnażanie
+    
+    world->removeDead();
     currentTick++;
 }
 

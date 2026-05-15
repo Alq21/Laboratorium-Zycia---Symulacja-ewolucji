@@ -41,22 +41,37 @@ std::unique_ptr<Organism> Thermophile::reproduce() {
     double childMaxEn = maxEnergy;
     int childSize = size;
     int childSpeed = speed;
+    double childPrefTemp = preferredTemperature;
     Color childColor = color;
 
-    // Pełny system ewolucji
-    if (childGen % 10 == 0) {
-        childMaxEn += 15.0;
-        childSize += 2;
-        childSpeed += 1;
-        // Termofile zyskują mocniejszy, czerwony kolor
-        childColor.r = std::min(255, childColor.r + 40);
-        childColor.b = std::max(0, childColor.b - 20);
+    // Mutacje z szansą 20%
+    if (rand() % 100 < 20) {
+        int mutationType = rand() % 4;
+        switch(mutationType) {
+        case 0: // Większa pojemność energii
+            childMaxEn += 12.0 + (rand() % 10);
+            childColor.r = std::min(255, childColor.r + 35);
+            break;
+        case 1: // Większy rozmiar
+            childSize += 1;
+            childColor.r = std::min(255, childColor.r + 20);
+            break;
+        case 2: // Większa szybkość
+            childSpeed += 1;
+            childColor.r = std::min(255, childColor.r + 25);
+            break;
+        case 3: // Wyższa preferowana temperatura
+            childPrefTemp += 2.0 + (rand() % 5);
+            childColor.r = std::min(255, childColor.r + 40);
+            childColor.b = std::max(0, childColor.b - 20);
+            break;
+        }
     } else {
-        // Naturalna, mała zmiana odcienia
+        // Drobne zmiany kolorów bez mutacji
         childColor.r = std::min(255, childColor.r + 2);
     }
 
-    return std::make_unique<Thermophile>(
+    auto child = std::make_unique<Thermophile>(
         childPos,
         childColor,
         energyGivenToChild,
@@ -66,6 +81,9 @@ std::unique_ptr<Organism> Thermophile::reproduce() {
         maxActionPoints,
         childGen
         );
+    // Ustawiamy nową preferowaną temperaturę
+    child->preferredTemperature = childPrefTemp;
+    return child;
 }
 
 

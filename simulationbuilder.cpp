@@ -2,6 +2,8 @@
 #include "world.h"
 #include "predator.h"
 #include "producer.h"
+#include "thermophile.h"
+#include "cryophile.h"
 #include "entity.h"
 #include <QFile>
 #include <QJsonDocument>
@@ -65,7 +67,33 @@ std::unique_ptr<Organism> SimulationBuilder::makeOrganism(const OrganismSpawnCon
             );
     }
 
-    error = QString("SimulationBuilder: unknown organism type \"%1\"")
+    if (cfg.type == "thermophile") {
+        return std::make_unique<Thermophile>(
+            pos,
+            Color{255, 100, 50},
+            cfg.startEnergy,
+            cfg.maxEnergy,
+            cfg.size,
+            cfg.speed,
+            cfg.maxAP,
+            0
+            );
+    }
+
+    if (cfg.type == "cryophile") {
+        return std::make_unique<Cryophile>(
+            pos,
+            Color{50, 150, 255},
+            cfg.startEnergy,
+            cfg.maxEnergy,
+            cfg.size,
+            cfg.speed,
+            cfg.maxAP,
+            0
+            );
+    }
+
+    error = QString("SimulationBuilder: unknown organism type")
                 .arg(QString::fromStdString(cfg.type));
     return nullptr;
 }
@@ -77,7 +105,7 @@ WorldConfig SimulationBuilder::loadConfig(const QString& path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        error = QString("SimulationBuilder: cannot open config file \"%1\"").arg(path);
+        error = QString("SimulationBuilder: cannot open config file ").arg(path);
         return config;
     }
 
@@ -86,7 +114,7 @@ WorldConfig SimulationBuilder::loadConfig(const QString& path) {
     file.close();
 
     if (doc.isNull()) {
-        error = QString("SimulationBuilder: JSON parse error — %1").arg(parseError.errorString());
+        error = QString("SimulationBuilder: JSON parse error").arg(parseError.errorString());
         return config;
     }
 
@@ -102,22 +130,61 @@ WorldConfig SimulationBuilder::loadConfig(const QString& path) {
         for (const QJsonValue& val : root["organisms"].toArray())
             config.organisms.push_back(parseOrganism(val.toObject()));
     }
-
+    qDebug() << " LOADING CONFIG ";
+    qDebug() << "File:" << path;
+    if (root.contains("organisms")) {
+        QJsonArray orgsArray = root["organisms"].toArray();
+        qDebug() << "Found" << orgsArray.size() << "organisms in JSON";
+    }
+    qDebug() << "Config loaded. Total organisms:" << config.organisms.size();
     return config;
 }
 
+    std::unique_ptr<World> SimulationBuilder::buildWorld(const WorldConfig& config) {
+        qDebug() << "\n=== BUILDING WORLD ===";
+        qDebug() << "Map size:" << config.width << "x" << config.height;
+        qDebug() << "Organisms to spawn:" << config.organisms.size();
 
-std::unique_ptr<World> SimulationBuilder::buildWorld(const WorldConfig& config) {
-    auto world = std::make_unique<World>(config.width, config.height, config.mapConfig);
+        auto world = std::make_unique<World>(config.width, config.height, config.mapConfig);
 
-    for (const auto& spawnCfg : config.organisms) {
-        auto organism = makeOrganism(spawnCfg);
-        if (organism)
-            world->addOrganism(std::move(organism));
+        int spawned = 0;
+        for (const auto& spawnCfg : config.organisms) {
+            qDebug() << "\nSpawning organism #" << (spawned+1);
+            qDebug() << "  Type:" << QString::fromStdString(spawnCfg.type);
+            qDebug() << "  Position: (" << spawnCfg.x << "," << spawnCfg.y << ")";
+            qDebug() << "  Energy:" << spawnCfg.startEnergy << "/" << spawnCfg.maxEnergy;
+            qDebug() << "  Size:" << spawnCfg.size;
+
+            auto organism = makeOrganism(spawnCfg);
+            if (organism) {
+                world->addOrganism(std::move(organism));
+                spawned++;
+                qDebug() << "  ✓ SUCCESS";
+            } else {
+                qDebug() << "  ✗ FAILED - makeOrganism returned nullptr";
+            }
+        }
+
+        qDebug() << "\n=== SPAWN SUMMARY ===";
+        qDebug() << "Requested:" << config.organisms.size();
+        qDebug() << "Spawned:" << spawned;
+        qDebug() << "In world:" << world->getOrganisms().size();
+
+        return world;
     }
 
-    return world;
-}
+
+// std::unique_ptr<World> SimulationBuilder::buildWorld(const WorldConfig& config) {
+//     auto world = std::make_unique<World>(config.width, config.height, config.mapConfig);
+
+//     for (const auto& spawnCfg : config.organisms) {
+//         auto organism = makeOrganism(spawnCfg);
+//         if (organism)
+//             world->addOrganism(std::move(organism));
+//     }
+
+//     return world;
+// }
 
 void SimulationBuilder::queueSpawn(int x, int y, const QString& type) {
     OrganismSpawnConfig cfg;
