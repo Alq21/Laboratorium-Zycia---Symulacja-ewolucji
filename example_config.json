@@ -1,0 +1,65 @@
+{
+  "world": {
+    "width": 80,
+    "height": 60,
+    "mapConfig": {
+      "baseNormalWeight": 100,
+      "baseAbundantWeight": 8,
+      "basePoisonWeight": 4,
+      "baseImpassableWeight": 5,
+      "clusterBonus": 150
+    }
+  },
+  "organisms": [
+    {
+      "type": "predator",
+      "x": 20, "y": 15,
+      "startEnergy": 100.0,
+      "maxEnergy": 300.0,
+      "size": 2,
+      "speed": 2,
+      "maxAP": 2,
+      "vision": 6
+    },
+    {
+      "type": "predator",
+      "x": 60, "y": 45,
+      "startEnergy": 100.0,
+      "maxEnergy": 300.0,
+      "size": 2,
+      "speed": 2,
+      "maxAP": 2,
+      "vision": 5
+    },
+    {
+      "type": "producer",
+      "x": 10, "y": 10,
+      "startEnergy": 80.0,
+      "maxEnergy": 200.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 40, "y": 30,
+      "startEnergy": 80.0,
+      "maxEnergy": 200.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 70, "y": 50,
+      "startEnergy": 80.0,
+      "maxEnergy": 200.0,
+      "size": 1,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    }
+  ]
+}

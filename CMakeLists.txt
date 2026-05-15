@@ -30,6 +30,7 @@ target_include_directories(LifeLabolatory PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+add_compile_definitions(SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
 target_link_libraries(LifeLabolatory PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 

@@ -1,5 +1,5 @@
-#include "Organism.h"
-#include "World.h"
+#include "organism.h"
+#include "world.h"
 #include <stdlib.h>
 #include "tile.h"
 #include <QDebug>
@@ -68,26 +68,13 @@ void Organism::executeMovement(World* world) {
         actionPoints--;
 
         // Koszt ruchu
-        setEnergy(energy - 1);
+        setEnergy(energy - 1.0);
     }
 }
-// void Organism::executeMovement(World* world) {
-//     if (!isAlive || actionPoints <= 0) {return;}
-// Tile* targetTile = world->getTile(plannedPosition);
-//     if (targetTile == nullptr) {
-//         plannedPosition = position;
-//         return;
-//     }
 
-//     if (position.x != plannedPosition.x || position.y != plannedPosition.y) {
-//         position = plannedPosition;
-//         actionPoints--;
-//     }
-
-
-// }
 bool Organism::getIsAlive() const { return isAlive; }
 double Organism::getEnergy() const { return energy; }
 int Organism::getGeneration() const { return generation; }
 int Organism::getSize() const { return size; }
 Color Organism::getColor() const { return color; }
+int Organism::getSpeed() const { return speed; }

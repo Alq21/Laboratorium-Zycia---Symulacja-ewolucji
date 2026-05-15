@@ -41,7 +41,11 @@ public:
     void setEnergy(double newEnergy);
     int getGeneration() const;
     int getSize() const;
+
     Color getColor() const;
+
+    int getSpeed() const;
+
 };
 
 #endif // ORGANISM_HSSS
