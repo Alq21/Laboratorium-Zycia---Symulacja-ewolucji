@@ -58,7 +58,7 @@ void Organism::onInteract(Entity* other) {
 
 
 bool Organism::canReproduce() const {
-  return isAlive && (energy >= (maxEnergy * 0.8));
+  return isAlive && (energy >= (maxEnergy * 0.7));
 }
 void Organism::executeMovement(World* world) {
     if (!isAlive || actionPoints <= 0) return;

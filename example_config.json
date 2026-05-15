@@ -1,65 +1,121 @@
 {
   "world": {
-    "width": 80,
-    "height": 60,
+    "width": 40,
+    "height": 30,
     "mapConfig": {
       "baseNormalWeight": 100,
-      "baseAbundantWeight": 8,
-      "basePoisonWeight": 4,
-      "baseImpassableWeight": 5,
+      "baseAbundantWeight": 15,
+      "basePoisonWeight": 2,
+      "baseImpassableWeight": 3,
       "clusterBonus": 150
     }
   },
   "organisms": [
     {
       "type": "predator",
-      "x": 20, "y": 15,
-      "startEnergy": 100.0,
-      "maxEnergy": 300.0,
-      "size": 8,
+      "x": 8,
+      "y": 6,
+      "startEnergy": 200.0,
+      "maxEnergy": 400.0,
+      "size": 3,
       "speed": 2,
       "maxAP": 2,
-      "vision": 6
+      "vision": 8
     },
     {
       "type": "predator",
-      "x": 60, "y": 45,
-      "startEnergy": 100.0,
-      "maxEnergy": 300.0,
-      "size": 8,
+      "x": 32,
+      "y": 24,
+      "startEnergy": 200.0,
+      "maxEnergy": 400.0,
+      "size": 3,
       "speed": 2,
       "maxAP": 2,
-      "vision": 5
+      "vision": 8
     },
     {
       "type": "producer",
-      "x": 40, "y": 30,
-      "startEnergy": 80.0,
-      "maxEnergy": 200.0,
-      "size": 10,
-      "speed": 1,
-      "maxAP": 1,
-      "preferredTemperature": 20.0
-    },
-    {
-      "type": "producer",
-      "x": 40, "y": 30,
-      "startEnergy": 110.0,
-      "maxEnergy": 200.0,
-      "size": 10,
-      "speed": 1,
-      "maxAP": 1,
-      "preferredTemperature": 20.0
-    },
-    {
-      "type": "producer",
-      "x": 45, "y": 50,
+      "x": 5,
+      "y": 5,
       "startEnergy": 120.0,
       "maxEnergy": 200.0,
-      "size": 10,
+      "size": 2,
       "speed": 1,
       "maxAP": 1,
       "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 15,
+      "y": 10,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 25,
+      "y": 15,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "producer",
+      "x": 35,
+      "y": 20,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1,
+      "preferredTemperature": 20.0
+    },
+    {
+      "type": "thermophile",
+      "x": 10,
+      "y": 22,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1
+    },
+    {
+      "type": "thermophile",
+      "x": 30,
+      "y": 8,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1
+    },
+    {
+      "type": "cryophile",
+      "x": 18,
+      "y": 25,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1
+    },
+    {
+      "type": "cryophile",
+      "x": 38,
+      "y": 12,
+      "startEnergy": 120.0,
+      "maxEnergy": 200.0,
+      "size": 2,
+      "speed": 1,
+      "maxAP": 1
     }
   ]
 }

@@ -103,25 +103,44 @@ void SimEngine::processEnergy()
     }
 }
 
-void SimEngine::processReproduction()
-{
-    std::vector<std::unique_ptr<Organism>> newborns;
-    for(const auto& organism : world->getOrganisms())
+
+
+    void SimEngine::processReproduction()
     {
-        if(organism->getIsAlive() && organism->canReproduce())
+        std::vector<std::unique_ptr<Organism>> newborns;
+
+        // Policz żywe organizmy
+        int aliveCount = 0;
+        for(const auto& org : world->getOrganisms()) {
+            if(org->getIsAlive()) aliveCount++;
+        }
+
+        // Jeśli przeludnienie (>50 organizmów), zwiększ śmiertelność
+        bool overpopulation = aliveCount > 20;
+
+        for(const auto& organism : world->getOrganisms())
         {
-            auto baby = organism->reproduce();
-            if(baby)
+            if(!organism->getIsAlive()) continue;
+
+            // Przeludnienie = dodatkowa utrata energii
+            if (overpopulation) {
+                organism->setEnergy(organism->getEnergy() - 2.0);
+            }
+
+            if(organism->canReproduce())
             {
-                newborns.push_back(std::move(baby));
+                auto child = organism->reproduce();
+                if(child) {
+                    newborns.push_back(std::move(child));
+                }
             }
         }
+
+        for(auto& newborn : newborns) {
+            world->addOrganism(std::move(newborn));
+        }
     }
-    for(auto& child : newborns)
-    {
-        world->addOrganism(std::move(child));
-    }
-}
+
 
 // void SimEngine::cleanup()
 // {

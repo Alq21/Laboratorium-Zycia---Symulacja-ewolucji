@@ -7,12 +7,14 @@
 #include "tile.h"
 
 #include <QTimer>
+#include <iostream>
 
 SimulationApp::SimulationApp(QObject* parent)
     : QObject(parent)
     , builder(std::make_unique<SimulationBuilder>())
 {
     tickTimer = new QTimer(this);
+      tickIntervalMs = 500;
     tickTimer->setInterval(tickIntervalMs);
     connect(tickTimer, &QTimer::timeout, this, &SimulationApp::onTick);
 }
@@ -100,14 +102,34 @@ std::vector<Entity*> SimulationApp::collectEntities() const {
     std::vector<Entity*> result;
     if (!world) return result;
 
-    for (int y = 0; y < world->getHeight(); ++y)
-        for (int x = 0; x < world->getWidth(); ++x)
-            if (Tile* t = world->getTile(Position(x, y)))
-                result.push_back(t);
+    // === DODAJ DEBUG ===
+    std::cout << "\n=== COLLECT ENTITIES ===" << std::endl;
 
-    for (const auto& org : world->getOrganisms())
-        if (org->getIsAlive())
+    // Zbierz płytki
+    for (int y = 0; y < world->getHeight(); ++y) {
+        for (int x = 0; x < world->getWidth(); ++x) {
+            if (Tile* t = world->getTile(Position(x, y))) {
+                result.push_back(t);
+            }
+        }
+    }
+
+    std::cout << "Tiles collected: " << result.size() << std::endl;
+
+    // Zbierz organizmy
+    int orgCount = 0;
+    for (const auto& org : world->getOrganisms()) {
+        if (org->getIsAlive()) {
             result.push_back(org.get());
+            orgCount++;
+            std::cout << "  Organism #" << orgCount << " at ("
+                      << org->getPosition().x << ","
+                      << org->getPosition().y << ")" << std::endl;
+        }
+    }
+
+    std::cout << "Organisms collected: " << orgCount << std::endl;
+    std::cout << "Total entities: " << result.size() << std::endl;
 
     return result;
 }

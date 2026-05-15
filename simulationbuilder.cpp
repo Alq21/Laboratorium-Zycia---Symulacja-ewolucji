@@ -56,7 +56,7 @@ std::unique_ptr<Organism> SimulationBuilder::makeOrganism(const OrganismSpawnCon
     if (cfg.type == "producer") {
         return std::make_unique<Producer>(
             pos,
-            Color{50, 200, 50},
+            Color{255, 220, 50},
             cfg.startEnergy,
             cfg.maxEnergy,
             cfg.size,

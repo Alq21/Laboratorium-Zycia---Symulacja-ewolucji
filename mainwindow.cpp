@@ -1,8 +1,10 @@
 #include "mainwindow.h"
+#include "organism.h"
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include <QTimer>
 #include <QFile>
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -12,6 +14,31 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Inicjalizacja aplikacji symulacyjnej kolegi
     simApp = new SimulationApp(this);
+    //
+    QTimer *updateTimer = new QTimer(this);
+    connect(updateTimer, &QTimer::timeout, this, [this](){
+        if (simApp && simApp->isRunning()) {
+            auto entities = simApp->collectEntities();
+
+            std::cout << "\n[MainWindow] Updating board with " << entities.size() << " entities" << std::endl;
+
+            // Policz organizmy
+            int orgCount = 0;
+            for (auto* e : entities) {
+                if (Organism* org = dynamic_cast<Organism*>(e)) {
+                    if (org->getIsAlive()) {
+                        orgCount++;
+                        std::cout << "  Organism at (" << org->getPosition().x << "," << org->getPosition().y << ")" << std::endl;
+                    }
+                }
+            }
+            std::cout << "  Total organisms to draw: " << orgCount << std::endl;
+
+            ui->boardWidget->setEntities(entities);
+        }
+    });
+    updateTimer->start(100);
+    //
 
     // POŁĄCZENIE: Kiedy symulacja zrobi krok, Twoja plansza dostaje dane
     connect(simApp, &SimulationApp::tickCompleted, this, [this](long tick) {
