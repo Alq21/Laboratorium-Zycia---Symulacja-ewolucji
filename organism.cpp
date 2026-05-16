@@ -30,7 +30,7 @@ void Organism::die() {
 void Organism::onTick(World* world) {
     if (!isAlive) return;
 
- setEnergy(energy - 10.0);
+ setEnergy(energy - 1.0);
     if (energy <= 0) {
         die();
     }
@@ -83,8 +83,8 @@ void Organism::executeMovement(World* world) {
         //  by organizmy sie nie nakładały ale to tak srednio działa
         Organism* occupant = world->getOrganismAt(plannedPosition);
         if (occupant != nullptr && occupant != this) {
+            // Pozycja zajęta - szukaj alternatywy
             std::vector<Position> alternatives;
-
 
             for (int dy = -1; dy <= 1; dy++) {
                 for (int dx = -1; dx <= 1; dx++) {
@@ -92,25 +92,38 @@ void Organism::executeMovement(World* world) {
 
                     Position alt = {position.x + dx, position.y + dy};
 
-
+                    // Sprawdź granice
                     if (alt.x < 0 || alt.x >= world->getWidth() ||
                         alt.y < 0 || alt.y >= world->getHeight()) {
                         continue;
                     }
 
+                    // Sprawdź przejezdność
                     Tile* altTile = world->getTile(alt);
                     if (!altTile || !altTile->isTraversable()) {
                         continue;
                     }
 
-
+                    // Sprawdź czy wolna
                     if (world->getOrganismAt(alt) == nullptr) {
                         alternatives.push_back(alt);
                     }
                 }
             }
-        }
 
+
+            if (!alternatives.empty()) {
+                // Wybierz losową wolną pozycję
+                int randomIndex = rand() % alternatives.size();
+                plannedPosition = alternatives[randomIndex];
+
+            } else {
+
+                plannedPosition = position;
+                isMoving = false;
+                return;
+            }
+        }
         lastPosition = position;
         position = plannedPosition;
         isMoving = true;
@@ -134,3 +147,4 @@ int Organism::getGeneration() const { return generation; }
 int Organism::getSize() const { return size; }
 Color Organism::getColor() const { return color; }
 int Organism::getSpeed() const { return speed; }
+

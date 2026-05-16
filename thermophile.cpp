@@ -25,16 +25,6 @@ void Thermophile::onTick(World* world) {
     }
 
 
-    int myPopulation = world->countPopulation<Thermophile>();
-    double densityPenalty = 0.0;
-    
-    if (myPopulation > 30) {
-        densityPenalty = (myPopulation - 30) * 0.05;
-    }
-    
-    if (densityPenalty > 0) {
-        setEnergy(energy - densityPenalty);
-    }
 
     Producer::onTick(world);
 }
@@ -55,9 +45,9 @@ std::unique_ptr<Organism> Thermophile::reproduce()
     int childSize = size;
     Color childColor = color;
 
-    // 30% szansa na mutację
+
     if (rand() % 100 < 30) {
-        // Mutacja koloru
+        // Mutacja kolor
         childColor.r = 200 + (rand() % 56);
         childColor.g = 100 + (rand() % 100);
         childColor.b = 20 + (rand() % 80);

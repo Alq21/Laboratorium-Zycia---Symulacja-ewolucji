@@ -20,16 +20,7 @@ void Cryophile::onTick(World* world) {
         setEnergy(energy - (tempDifference * 0.2));
     }
 
-    int myPopulation = world->countPopulation<Cryophile>();
-    double densityPenalty = 0.0;
-    
-    if (myPopulation > 30) {
-        densityPenalty = (myPopulation - 30) * 0.05;
-    }
-    
-    if (densityPenalty > 0) {
-        setEnergy(energy - densityPenalty);
-    }
+
 
     Producer::onTick(world);
 }

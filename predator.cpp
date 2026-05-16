@@ -34,23 +34,15 @@ void Predator::onTick(World* world) {
     if (!isAlive) return;
 
 
-    int myPopulation = world->countPopulation<Predator>();
-    double densityPenalty = 0.0;
-    
-    // Drapieżnicy cierpią bardziej przy przeludnieniu
-    if (myPopulation > 15) {
-        densityPenalty = (myPopulation - 15) * 0.1;
+    setEnergy(energy - 10);
+
+    if (energy <= 0) {
+        die();
     }
 
-    // Stosujemy podstawowy onTick z Organism
-    Organism::onTick(world);
-    
-    // Dodatkowa kara za przeludnienie
-    if (densityPenalty > 0) {
-        setEnergy(energy - densityPenalty);
-    }
+    double energyRatio = energy / maxEnergy;
+    actionPoints = std::max(1, static_cast<int>(speed * energyRatio));
 }
-
 void Predator::planMove(World* world) {
     if (!isAlive || actionPoints <= 0) {
         return;

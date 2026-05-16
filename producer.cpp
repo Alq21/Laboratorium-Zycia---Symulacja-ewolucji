@@ -1,6 +1,5 @@
 #include "producer.h"
 #include "world.h"
-#include <iostream>
 #include <stdlib.h>
 
 Producer::Producer(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen, double prefTemp)
@@ -10,23 +9,15 @@ Producer::Producer(Position pos, Color col, double startEnergy, double maxEn, in
 }
 
 void Producer::onTick(World* world) {
-    if (!isAlive) {
-        return;
-    }
+    if (!isAlive) return;
 
 
-    double baseCost = 1.0;
-    
-   // większa populacja = większa śmiertelność
-    int myPopulation = world->countPopulation<Producer>();
-    double densityPenalty = 0.0;
-    
-    if (myPopulation > 30) {
-        densityPenalty = (myPopulation - 30) * 0.05; // Kara rośnie liniowo
-    }
-    
-    energy -= (baseCost + densityPenalty);
+    setEnergy(energy - 1);
+
     actionPoints = maxActionPoints;
+
+
+
 
     if (energy <= 0.0) {
         die();

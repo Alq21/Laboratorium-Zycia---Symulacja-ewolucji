@@ -14,7 +14,7 @@ public:
 void onTick(World* world) override;
     void planMove(World* world) override;
     void onInteract(Entity* other) override;
-
+    int getVision(){return visionRange;}
     bool canReproduce() const override;
     std::unique_ptr<Organism> reproduce() override;
 
