@@ -19,16 +19,29 @@ void Thermophile::onTick(World* world) {
     double tempDifference = std::abs(currentTemp - preferredTemperature);
 
     if (tempDifference <= 10.0) {
-        setEnergy(energy + 5.0);  // zysk z adobre srodowisko
+        setEnergy(energy + 5.0);
     } else {
-        setEnergy(energy - (tempDifference * 0.2)); // Kara za złe środowisko
+        setEnergy(energy - (tempDifference * 0.2));
+    }
+
+    // Density-dependent mortality
+    int myPopulation = world->countPopulation<Thermophile>();
+    double densityPenalty = 0.0;
+    
+    if (myPopulation > 30) {
+        densityPenalty = (myPopulation - 30) * 0.05;
+    }
+    
+    if (densityPenalty > 0) {
+        setEnergy(energy - densityPenalty);
     }
 
     Producer::onTick(world);
 }
 
 std::unique_ptr<Organism> Thermophile::reproduce() {
-    if (!canReproduce()) {
+    // Niższy próg reprodukcji - 60% zamiast 80%
+    if (!isAlive || energy < (maxEnergy * 0.6)) {
         return nullptr;
     }
 
@@ -41,37 +54,20 @@ std::unique_ptr<Organism> Thermophile::reproduce() {
     double childMaxEn = maxEnergy;
     int childSize = size;
     int childSpeed = speed;
-    double childPrefTemp = preferredTemperature;
     Color childColor = color;
 
-    // Mutacje z szansą 20%
-    if (rand() % 100 < 20) {
-        int mutationType = rand() % 4;
-        switch(mutationType) {
-        case 0: // Większa pojemność energii
-            childMaxEn += 12.0 + (rand() % 10);
-            childColor.r = std::min(255, childColor.r + 35);
-            break;
-        case 1: // Większy rozmiar
-            childSize += 1;
-            childColor.r = std::min(255, childColor.r + 20);
-            break;
-        case 2: // Większa szybkość
-            childSpeed += 1;
-            childColor.r = std::min(255, childColor.r + 25);
-            break;
-        case 3: // Wyższa preferowana temperatura
-            childPrefTemp += 2.0 + (rand() % 5);
-            childColor.r = std::min(255, childColor.r + 40);
-            childColor.b = std::max(0, childColor.b - 20);
-            break;
-        }
+    // Pełny system ewolucji
+    if (childGen % 10 == 0) {
+        childMaxEn += 15.0;
+        childSize += 2;
+        childSpeed += 1;
+        childColor.r = std::min(255, childColor.r + 40);
+        childColor.b = std::max(0, childColor.b - 20);
     } else {
-        // Drobne zmiany kolorów bez mutacji
         childColor.r = std::min(255, childColor.r + 2);
     }
 
-    auto child = std::make_unique<Thermophile>(
+    return std::make_unique<Thermophile>(
         childPos,
         childColor,
         energyGivenToChild,
@@ -81,9 +77,6 @@ std::unique_ptr<Organism> Thermophile::reproduce() {
         maxActionPoints,
         childGen
         );
-    // Ustawiamy nową preferowaną temperaturę
-    child->preferredTemperature = childPrefTemp;
-    return child;
 }
 
 
@@ -91,6 +84,7 @@ std::unique_ptr<Organism> Thermophile::reproduce() {
 
 
 void Thermophile::planMove(World* world) {
+    // to ogólnie bedzie działać jak dodamy płytki tak samo w crypthophile
     if (!isAlive || actionPoints <= 0) return;
 
     double bestTempDifference = 9999.0;
@@ -110,7 +104,7 @@ void Thermophile::planMove(World* world) {
 
                 if (tempDifference < bestTempDifference) {
                     bestTempDifference = tempDifference;
-                    equallyGoodPositions.clear(); // Czyścimy stare wyniki
+                    equallyGoodPositions.clear();
                     equallyGoodPositions.push_back(checkPos);
                 } else if (tempDifference == bestTempDifference) {
                     equallyGoodPositions.push_back(checkPos);

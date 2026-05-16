@@ -8,3 +8,7 @@ bool ImpassableTile::blockMovement() const {
 
 void ImpassableTile::applyEffect(Organism* organism) {
 }
+
+bool ImpassableTile::isTraversable() const {
+    return false;
+}

@@ -33,12 +33,21 @@ Position Predator::findNearestPrey(World* world) {
 void Predator::onTick(World* world) {
     if (!isAlive) return;
 
-    // Wyższy koszt utrzymania dla drapieżników
-    energy -= 3.0;
-    actionPoints = maxActionPoints;
+    // Density-dependent mortality dla drapieżników
+    int myPopulation = world->countPopulation<Predator>();
+    double densityPenalty = 0.0;
+    
+    // Drapieżnicy cierpią bardziej przy przeludnieniu
+    if (myPopulation > 15) {
+        densityPenalty = (myPopulation - 15) * 0.1;
+    }
 
-    if (energy <= 0.0) {
-        die();
+    // Stosujemy podstawowy onTick z Organism
+    Organism::onTick(world);
+    
+    // Dodatkowa kara za przeludnienie
+    if (densityPenalty > 0) {
+        setEnergy(energy - densityPenalty);
     }
 }
 
@@ -102,36 +111,14 @@ std::unique_ptr<Organism> Predator::reproduce() {
     int childVision = visionRange;
     Color childColor = color;
 
-    // Mutacje z szansą 20%
-    if (rand() % 100 < 20) {
-        int mutationType = rand() % 5;
-        switch(mutationType) {
-        case 0: // Większa pojemność energii
-            childMaxEn += 15.0 + (rand() % 15);
-            childColor.r = std::min(255, childColor.r + 30);
-            break;
-        case 1: // Większy rozmiar
-            childSize += 1;
-            childColor.g = std::min(255, childColor.g + 20);
-            break;
-        case 2: // Większa szybkość
-            childSpeed += 1;
-            childColor.b = std::min(255, childColor.b + 25);
-            break;
-        case 3: // Lepszy wzrok
-            childVision += 1;
-            childColor.b = std::min(255, childColor.b + 40);
-            break;
-        case 4: // Kombinacja - bardziej zrównoważony drapieżnik
-            childMaxEn += 10.0;
-            childSpeed += 1;
-            childColor.r = std::min(255, childColor.r + 20);
-            childColor.b = std::min(255, childColor.b + 20);
-            break;
-        }
+    if (childGen % 10 == 0) {
+        childMaxEn += 20.0;
+        childSize += 3;
+        childSpeed += 2;
+        childVision += 2;
+        childColor.b = std::min(255, childColor.b + 50);
     } else {
-        // Drobne zmiany kolorów bez mutacji
-        childColor.r = std::max(100, childColor.r - 3);
+        childColor.r = std::max(100, childColor.r - 5);
     }
 
     return std::make_unique<Predator>(

@@ -6,7 +6,8 @@
 
 Organism::Organism(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen)
     : Entity(pos, col), energy(startEnergy), maxEnergy(maxEn), isAlive(true), size(size), speed(speed),
-    actionPoints(maxAP), maxActionPoints(maxAP), plannedPosition(pos), generation(gen) {
+    actionPoints(maxAP), maxActionPoints(maxAP), plannedPosition(pos), generation(gen),
+    previousPosition(pos), isMoving(false) {
 }
 
 void Organism::setEnergy(double newEnergy) {
@@ -29,7 +30,7 @@ void Organism::die() {
 void Organism::onTick(World* world) {
     if (!isAlive) return;
 
- // setEnergy(energy - 10.0);
+ setEnergy(energy - 10.0);
     if (energy <= 0) {
         die();
     }
@@ -58,30 +59,43 @@ void Organism::onInteract(Entity* other) {
 
 
 bool Organism::canReproduce() const {
-  return isAlive && (energy >= (maxEnergy * 0.7));
+  return isAlive && (energy >= (maxEnergy * 0.8));
 }
 void Organism::executeMovement(World* world) {
     if (!isAlive || actionPoints <= 0) return;
 
-    // Sprawdzamy czy ruch jest w granicach mapy
-    if (plannedPosition.x < 0 || plannedPosition.x >= world->getWidth() ||
-        plannedPosition.y < 0 || plannedPosition.y >= world->getHeight()) {
-        return; // Nie możemy wyjść poza mapę
-    }
-
-    // Sprawdzamy czy płytka jest przejezdna
-    Tile* targetTile = world->getTile(plannedPosition);
-    if (targetTile && !targetTile->isTraversable()) {
-        return; // Nie możemy wejść na nieprzejezdną płytkę
-    }
-
-    // Wykonujemy ruch jeśli pozycja się zmienia
     if (position.x != plannedPosition.x || position.y != plannedPosition.y) {
+        // Sprawdzenie czy pozycja jest w granicach mapy
+        if (plannedPosition.x < 0 || plannedPosition.x >= world->getWidth() ||
+            plannedPosition.y < 0 || plannedPosition.y >= world->getHeight()) {
+            plannedPosition = position;
+            isMoving = false;
+            return;
+        }
+
+        // Sprawdzenie czy kafelek jest przechodzalny
+        Tile* targetTile = world->getTile(plannedPosition);
+        if (targetTile && !targetTile->isTraversable()) {
+            plannedPosition = position;
+            isMoving = false;
+            return;
+        }
+
+        // Ruch jest dozwolony - zapisujemy poprzednią pozycję dla animacji
+        previousPosition = position;
         position = plannedPosition;
+        isMoving = true;
         actionPoints--;
 
         // Koszt ruchu
-        setEnergy(energy - 5.0);
+        setEnergy(energy - 1.0);
+
+        // Natychmiastowe efekty tile po wejściu
+        if (targetTile) {
+            targetTile->applyEffect(this);
+        }
+    } else {
+        isMoving = false;
     }
 }
 

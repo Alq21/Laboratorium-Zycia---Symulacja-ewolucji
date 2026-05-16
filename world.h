@@ -48,6 +48,18 @@ public:
     // dla parametrów srodowiska
     void setGlobalParameters(EnvironmentParameters parameters);
     EnvironmentParameters getCombinedParameters(Position pos) const;
+    
+    // Liczenie populacji danego typu
+    template<typename T>
+    int countPopulation() const {
+        int count = 0;
+        for (const auto& org : organisms) {
+            if (org->getIsAlive() && dynamic_cast<T*>(org.get())) {
+                count++;
+            }
+        }
+        return count;
+    }
 };
 
 #endif // WORLD_H

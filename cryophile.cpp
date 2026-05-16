@@ -20,6 +20,18 @@ void Cryophile::onTick(World* world) {
         setEnergy(energy - (tempDifference * 0.2));
     }
 
+    // Density-dependent mortality
+    int myPopulation = world->countPopulation<Cryophile>();
+    double densityPenalty = 0.0;
+    
+    if (myPopulation > 30) {
+        densityPenalty = (myPopulation - 30) * 0.05;
+    }
+    
+    if (densityPenalty > 0) {
+        setEnergy(energy - densityPenalty);
+    }
+
     Producer::onTick(world);
 }
 
@@ -62,7 +74,8 @@ void Cryophile::planMove(World* world) {
 }
 
 std::unique_ptr<Organism> Cryophile::reproduce() {
-    if (!canReproduce()) {
+    // Niższy próg reprodukcji - 60% zamiast 80%
+    if (!isAlive || energy < (maxEnergy * 0.6)) {
         return nullptr;
     }
 
@@ -75,37 +88,22 @@ std::unique_ptr<Organism> Cryophile::reproduce() {
     double childMaxEn = maxEnergy;
     int childSize = size;
     int childSpeed = speed;
-    double childPrefTemp = preferredTemperature;
     Color childColor = color;
 
-    // Mutacje z szansą 20%
-    if (rand() % 100 < 20) {
-        int mutationType = rand() % 4;
-        switch(mutationType) {
-        case 0: // Większa pojemność energii
-            childMaxEn += 12.0 + (rand() % 10);
-            childColor.b = std::min(255, childColor.b + 35);
-            break;
-        case 1: // Większy rozmiar
-            childSize += 1;
-            childColor.b = std::min(255, childColor.b + 20);
-            break;
-        case 2: // Większa szybkość
-            childSpeed += 1;
-            childColor.b = std::min(255, childColor.b + 25);
-            break;
-        case 3: // Niższa preferowana temperatura
-            childPrefTemp -= 2.0 + (rand() % 5);
-            childColor.b = std::min(255, childColor.b + 40);
-            childColor.r = std::max(0, childColor.r - 20);
-            break;
-        }
+
+    if (childGen % 10 == 0) {
+        childMaxEn += 15.0;
+        childSize += 2;
+        childSpeed += 1;
+
+        childColor.b = std::min(255, childColor.b + 40);
+        childColor.r = std::max(0, childColor.r - 20);
     } else {
-        // Drobne zmiany kolorów bez mutacji
+
         childColor.b = std::min(255, childColor.b + 2);
     }
 
-    auto child = std::make_unique<Cryophile>(
+    return std::make_unique<Cryophile>(
         childPos,
         childColor,
         energyGivenToChild,
@@ -115,7 +113,4 @@ std::unique_ptr<Organism> Cryophile::reproduce() {
         maxActionPoints,
         childGen
         );
-    // Ustawiamy nową preferowaną temperaturę
-    child->preferredTemperature = childPrefTemp;
-    return child;
 }

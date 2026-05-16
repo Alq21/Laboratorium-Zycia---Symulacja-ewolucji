@@ -18,6 +18,10 @@ protected:
     int maxActionPoints;
     Position plannedPosition;
     int generation;
+    
+    // Dla płynnej animacji ruchu
+    Position previousPosition;
+    bool isMoving;
 
 public:
    Organism(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen);
@@ -45,6 +49,10 @@ public:
     Color getColor() const;
 
     int getSpeed() const;
+    
+    // Dla płynnej animacji
+    Position getPreviousPosition() const { return previousPosition; }
+    bool getIsMoving() const { return isMoving; }
 
 };
 
