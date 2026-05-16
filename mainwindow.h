@@ -2,30 +2,37 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "tempboard.h"
-#include "simengine.h"
-#include "world.h"
+
+#include <QTimer>
+// potem trzeba ten zegar usunąć
+
+#include "simulationapp.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    explicit MainWindow(QWidget* parent = nullptr);
+    ~MainWindow() override;
 
 private slots:
-    void on_StepButton_clicked();
-    void on_pushButton_clicked();
+    void on_resumeButton_clicked();
+    void on_startButton_clicked();
+    void on_stopButton_clicked();
+
+    void on_stepButton_clicked();
+    void on_pauseButton_clicked();
+
 
 private:
     Ui::MainWindow *ui;
-    TempBoard *board;
-    World *world;
-    SimEngine *engine;
+    SimulationApp *simApp;
 };
 
 #endif // MAINWINDOW_H

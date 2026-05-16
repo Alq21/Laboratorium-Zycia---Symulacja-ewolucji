@@ -4,10 +4,14 @@
 #include "abundanttile.h"
 #include "poisontile.h"
 #include "impassabletile.h"
+#include "predator.h"
+#include "producer.h"
 #include "tile.h"
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <qdebug.h>
+#include <qlogging.h>
 
 
 World::World(int w, int h, MapConfig config) : width(w), height(h) {
@@ -64,6 +68,31 @@ void World::generateMap(const MapConfig& config) {
         }
     }
 }
+void World::populate(int numProducers, int numPredators) {
+    // Zaludniamy świat Producentami
+    for (int i = 0; i < numProducers; ++i) {
+        int randomX = std::rand() % width;
+        int randomY = std::rand() % height;
+        Position randomPos{randomX, randomY};
+
+        auto producer = std::make_unique<Producer>(
+            randomPos, Color{0, 255, 0}, 50.0, 100.0, 1, 1, 1, 1, 20.0
+            );
+        addOrganism(std::move(producer));
+    }
+
+    // Zaludniamy świat Drapieżnikami
+    for (int i = 0; i < numPredators; ++i) {
+        int randomX = std::rand() % width;
+        int randomY = std::rand() % height;
+        Position randomPos{randomX, randomY};
+
+        auto predator = std::make_unique<Predator>(
+            randomPos, Color{255, 0, 0}, 100.0, 200.0, 1, 1, 1, 1, 5
+            );
+        addOrganism(std::move(predator));
+    }
+}
 
 Tile* World::getTile(Position p) const {
         // Sprawdzanie czy współrzędne nie są poza mapą
@@ -79,11 +108,37 @@ void World::setTile(Position p, std::unique_ptr<Tile> newTile) {
     }
 }
 
-void World::addOrganism(std::unique_ptr<Organism> o) {
-    if (o) {
+
+
+    // Funkcja addOrganism - CAŁA NOWA WERSJA:
+    void World::addOrganism(std::unique_ptr<Organism> o) {
+        if (!o) {
+            qDebug() << "  ✗ Cannot add null organism";
+            return;
+        }
+
+        Position pos = o->getPosition();
+
+        // Walidacja granic mapy
+        if (pos.x < 0 || pos.x >= width || pos.y < 0 || pos.y >= height) {
+            qDebug() << "  ✗ Organism at (" << pos.x << "," << pos.y
+                     << ") is OUTSIDE map bounds (" << width << "x" << height << ")";
+            return;
+        }
+
+        // Sprawdź czy pozycja jest już zajęta
+        for (const auto& existing : organisms) {
+            if (existing->getPosition() == pos) {
+                qDebug() << "   WARNING: Position (" << pos.x << "," << pos.y
+                         << ") is already occupied! Organisms will overlap.";
+                break;
+            }
+        }
+
         organisms.push_back(std::move(o));
+        qDebug() << "  ✓ Added at (" << pos.x << "," << pos.y << ")";
     }
-}
+
 
 Organism* World::getOrganismAt(Position p) const {
     for (const auto& org : organisms) {
@@ -102,5 +157,17 @@ void World::removeDead() {
         }),
         organisms.end()
         );
+}
+void World::setGlobalParameters(EnvironmentParameters parameters) {
+    globalParameters = parameters;
+}
+EnvironmentParameters World::getCombinedParameters(Position pos) const {
+    Tile* tile = getTile(pos);
+    if (tile != nullptr) {
+        // GLOBALNE + LOKALNE = RZECZYWISTE W
+        return globalParameters + tile->getLocalModifiers();
+    }
+    // Jeśli z jakiegoś powodu jesteśmy poza mapą, zwracamy tylko globalne
+    return globalParameters;
 }
 World::~World() = default;

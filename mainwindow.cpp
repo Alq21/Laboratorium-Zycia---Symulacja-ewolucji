@@ -1,61 +1,87 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "predator.h"
-#include <vector>
-#include <memory>
+#include <QFile>
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , board(nullptr)
-    , world(nullptr)
-    , engine(nullptr)
 {
     ui->setupUi(this);
 
+    simApp = new SimulationApp(this);
 
-    board = new TempBoard(this);
-
-    board->setGeometry(10, 50, 500, 500);
-
-
-    world = new World(50, 50);
-    engine = new SimEngine(world, nullptr); // StatManager narazie nullptr
-
-
-    std::unique_ptr<Organism> testBug = std::make_unique<Predator>(
-        Position{5, 5},
-        Color{255, 0, 0},
-        100.0, // startEnergy
-        200.0, // maxEnergy
-        1,     // size
-        1,     // speed
-        1,     // maxAP
-        1,     // generation
-        5      // visionRange
-        );
-    world->addOrganism(std::move(testBug));
-
-    std::vector<Entity*> entitiesToDraw;
-    for(const auto& org : world->getOrganisms()) {
-        entitiesToDraw.push_back(org.get());
+    // Załaduj config
+    QString configPath = "example_config.json";
+    if (!QFile::exists(configPath)) {
+        configPath = QString(SOURCE_DIR) + "/example_config.json";
     }
-    board->setEntities(entitiesToDraw);
 
-    resize(600, 600);
+    if (simApp->loadFromFile(configPath)) {
+        std::cout << "Config loaded successfully!" << std::endl;
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    } else {
+        std::cout << "ERROR: " << simApp->lastError().toStdString() << std::endl;
+    }
+
+
+    ui->boardWidget->setSimApp(simApp);
+
+
+    connect(simApp, &SimulationApp::tickCompleted, this, [this](long tick){
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    });
+
+    resize(900, 780);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-
-    delete engine;
-    delete world;
 }
 
-void MainWindow::on_StepButton_clicked()
-{}
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_startButton_clicked()
 {
+    if (simApp) {
+        std::cout << "START clicked" << std::endl;
+        simApp->startSimulation();
+    }
+}
 
+void MainWindow::on_stopButton_clicked()
+{
+    if (simApp) {
+        std::cout << "STOP clicked" << std::endl;
+        simApp->stopSimulation();
+    }
+}
+
+void MainWindow::on_pauseButton_clicked()
+{
+    if (simApp) {
+        std::cout << "PAUSE clicked" << std::endl;
+        simApp->pauseSimulation();
+    }
+}
+
+void MainWindow::on_resumeButton_clicked()
+{
+    if (simApp) {
+        std::cout << "RESUME clicked" << std::endl;
+        simApp->resumeSimulation();
+    }
+}
+
+void MainWindow::on_stepButton_clicked()
+{
+    if (simApp) {
+        std::cout << "STEP clicked" << std::endl;
+        simApp->stepSimulation();
+
+        // Odśwież widok
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    }
 }

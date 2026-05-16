@@ -31,18 +31,18 @@ Position Predator::findNearestPrey(World* world) {
     return bestPos;
 }
 void Predator::onTick(World* world) {
-    if (!isAlive) {
-        return;
-    }
+    if (!isAlive) return;
 
-    energy -= 2.0;
-    actionPoints = maxActionPoints;
 
-    if (energy <= 0.0) {
+    setEnergy(energy - 10);
+
+    if (energy <= 0) {
         die();
     }
-}
 
+    double energyRatio = energy / maxEnergy;
+    actionPoints = std::max(1, static_cast<int>(speed * energyRatio));
+}
 void Predator::planMove(World* world) {
     if (!isAlive || actionPoints <= 0) {
         return;
@@ -76,14 +76,9 @@ void Predator::onInteract(Entity* other) {
 
 void Predator::hunt(Organism* target) {
     if (target && target->getIsAlive()) {
-        double gainedEnergy = target->getEnergy();
-
-        setEnergy(energy + gainedEnergy);
-        if (energy > maxEnergy) {
-            energy = maxEnergy;
-        }
-
-        target->die();
+        double stolenEnergy = target->getEnergy() / 1.5;
+        target->setEnergy(target->getEnergy() - stolenEnergy);
+        this->setEnergy(this->energy + stolenEnergy);
     }
 }
 
@@ -91,13 +86,53 @@ bool Predator::canReproduce() const {
     return isAlive && (energy >= 150.0);
 }
 
-std::unique_ptr<Organism> Predator::reproduce() {
-    if (!canReproduce()) {
-        return nullptr;
+std::unique_ptr<Organism> Predator::reproduce()
+{
+    if (!canReproduce()) return nullptr;
+
+    double childEnergy = energy * 0.5;
+    energy -= childEnergy;
+
+    Position childPos = position;
+    childPos.x += 1;
+
+    double childMaxEn = maxEnergy;
+    int childVision = visionRange;
+    int childSpeed = speed;
+    int childSize = size;
+    Color childColor = color;
+
+
+    if (rand() % 100 < 25) {
+        // Mutacja koloru
+        childColor.r = 200 + (rand() % 56);
+        childColor.g = rand() % 100;
+        childColor.b = rand() % 100;
+
+        // Mutacja rozmiaru
+        int sizeChange = (rand() % 3) - 1;
+        childSize += sizeChange;
+        if (childSize < 2) childSize = 2;
+        if (childSize > 5) childSize = 5;
+
+        // Mutacja wzroku
+        int visionChange = (rand() % 5) - 2;  // -2 do +2
+        childVision += visionChange;
+        if (childVision < 3) childVision = 3;
+        if (childVision > 15) childVision = 15;
+
+
     }
 
-    energy -= 80.0;
-    Position childPos = {position.x - 1, position.y - 1};
-
-    return std::make_unique<Predator>(childPos, Color{255, 0, 0}, 100.0, maxEnergy, size, speed, maxActionPoints, generation + 1, visionRange);
+    return std::make_unique<Predator>(
+        childPos,
+        childColor,
+        childEnergy,
+        childMaxEn,
+        childSize,
+        childSpeed,
+        maxActionPoints,
+        generation + 1,
+        childVision
+        );
 }

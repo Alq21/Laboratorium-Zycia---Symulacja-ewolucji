@@ -1,4 +1,5 @@
 #include "producer.h"
+#include "world.h"
 #include <stdlib.h>
 
 Producer::Producer(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen, double prefTemp)
@@ -8,12 +9,15 @@ Producer::Producer(Position pos, Color col, double startEnergy, double maxEn, in
 }
 
 void Producer::onTick(World* world) {
-    if (!isAlive) {
-        return;
-    }
+    if (!isAlive) return;
 
-    energy -= 1.0;
+
+    setEnergy(energy - 1);
+
     actionPoints = maxActionPoints;
+
+
+
 
     if (energy <= 0.0) {
         die();
@@ -35,35 +39,63 @@ void Producer::onInteract(Entity* other) {
     // Producenci nie atakują innych jednostek, ignorują interakcje
 }
 
-bool Producer::canReproduce() const {
-    return isAlive && (energy >= reproductionThreshold);
-}
 
-std::unique_ptr<Organism> Producer::reproduce() {
-    if (!canReproduce()) {
-        return nullptr;
-    }
+std::unique_ptr<Organism> Producer::reproduce()
+{
+    if (!canReproduce()) return nullptr;
 
-    energy -= (reproductionThreshold / 2.0);
+    double childEnergy = energy * 0.4;
+    energy -= childEnergy;
 
-    int childGeneration = generation + 1;
-    Position childPos = {position.x + 1, position.y + 1};
+    Position childPos = position;
+    childPos.x += 1;
 
-    Color childColor = color;
+
     double childMaxEn = maxEnergy;
     int childSize = size;
+    Color childColor = color;
+    double childPrefTemp = preferredTemperature;
 
-    if (childGeneration % 10 == 0) {
-        childMaxEn += 10.0;
-        childSize += 1;
-        // std::max z biblioteki <algorithm> dba o to, by kolor nie spadł poniżej zera
-        childColor = Color{color.r, std::max(0, color.g - 20), color.b};
-    } else {
-        // std::min zapobiega przekroczeniu wartości 255
-        childColor.g = std::min(255, color.g + 2);
+
+    if (rand() % 100 < 30) {
+        // Mutacja koloru
+        childColor.r += (rand() % 100) - 50;
+        childColor.g += (rand() % 100) - 50;
+        childColor.b += (rand() % 60) - 30;
+
+
+        if (childColor.r < 80) childColor.r = 80;
+        if (childColor.r > 255) childColor.r = 255;
+        if (childColor.g < 150) childColor.g = 150;
+        if (childColor.g > 255) childColor.g = 255;
+        if (childColor.b < 20) childColor.b = 20;
+        if (childColor.b > 120) childColor.b = 120;
+
+        // Mutacja rozmiaru
+        int sizeChange = (rand() % 5) - 2;
+        childSize += sizeChange;
+        if (childSize < 1) childSize = 1;
+        if (childSize > 6) childSize = 6;
+
+        // Mutacja energii
+        int energyChange = (rand() % 80) - 40;
+        childMaxEn += energyChange;
+        if (childMaxEn < 100) childMaxEn = 100;
+        if (childMaxEn > 450) childMaxEn = 450;
+
     }
 
-    return std::make_unique<Producer>(childPos, childColor, childMaxEn * 0.4, childMaxEn, childSize, speed, maxActionPoints, childGeneration, preferredTemperature);
+    return std::make_unique<Producer>(
+        childPos,
+        childColor,
+        childEnergy,
+        childMaxEn,
+        childSize,
+        speed,
+        maxActionPoints,
+        generation + 1,
+        childPrefTemp
+        );
 }
 void Producer::photosynthesize(double amount) {
     if (isAlive) {
