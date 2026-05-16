@@ -1,5 +1,9 @@
 #include "tempboard.h"
+#include "abundanttile.h"
+#include "impassabletile.h"
+#include "normaltile.h"
 #include "organism.h"
+#include "poisontile.h"
 #include "predator.h"
 #include "producer.h"
 #include "tile.h"
@@ -36,24 +40,29 @@ void TempBoard::paintEvent(QPaintEvent *event)
         if (!entity) continue;
 
         if (Tile* tile = dynamic_cast<Tile*>(entity)) {
-            Color c = tile->getColor();
             Position pos = tile->getPosition();
-
             int x = pos.x * tileSize;
             int y = pos.y * tileSize;
 
-            // Podstawowy gradient
-            QLinearGradient grad(x, y, x + tileSize, y + tileSize);
-            QColor base(c.r, c.g, c.b);
-            grad.setColorAt(0, base.lighter(115));
-            grad.setColorAt(1, base.darker(105));
+            if (dynamic_cast<NormalTile*>(tile)) {
+                painter.fillRect(x, y, tileSize, tileSize, QColor(70, 70, 70));
+                painter.setPen(QPen(QColor(50, 50, 50), 0.5));
+                painter.drawRect(x, y, tileSize, tileSize);
+            }
+            else if (dynamic_cast<AbundantTile*>(tile)) {
+                painter.fillRect(x, y, tileSize, tileSize, QColor(100, 180, 100));
+            }
+            else if (dynamic_cast<PoisonTile*>(tile)) {
+                painter.fillRect(x, y, tileSize, tileSize, QColor(180, 80, 80));
+            }
+            else if (dynamic_cast<ImpassableTile*>(tile)) {
+                painter.fillRect(x, y, tileSize, tileSize, QColor(30, 30, 30));
+            }
+        }
 
-            painter.fillRect(x, y, tileSize, tileSize, grad);
 
-            // Cienka obwódka
-            painter.setPen(QPen(QColor(0, 0, 0, 40), 1));
-            painter.drawRect(x, y, tileSize, tileSize);
-        }}
+
+        }
     int organismCount = 0;
 
     for (Entity* entity : entities) {
@@ -69,10 +78,10 @@ void TempBoard::paintEvent(QPaintEvent *event)
 
         std::cout << "Drawing #" << organismCount << " at (" << pos.x << "," << pos.y
                   << ") Color(" << c.r << "," << c.g << "," << c.b
-                  << ") Size:" << org->getSize() << std::endl;
+                  << ") Size:" << org->getSize()*3 << std::endl;
 
         // Średni rozmiar (nie za duży, nie za mały)
-        int visualSize = org->getSize();
+        int visualSize = org->getSize()*2;
 
         int centerX = pos.x * tileSize;
         int centerY = pos.y * tileSize;
@@ -87,62 +96,3 @@ void TempBoard::paintEvent(QPaintEvent *event)
 
     std::cout << "DRAWN: " << organismCount << std::endl;
 }
-    // 3. RYSUJ ORGANIZMY - połączone z liczeniem
-    // int organismCount = 0;
-
-    // for (Entity* entity : entities) {
-    //     if (!entity) continue;
-
-    //     // Pomijamy płytki
-    //     if (dynamic_cast<Tile*>(entity)) continue;
-
-    //     // Sprawdzamy czy to organizm
-    //     Organism* org = dynamic_cast<Organism*>(entity);
-    //     if (!org) continue;
-
-    //     // Sprawdzamy czy żyje
-    //     if (!org->getIsAlive()) {
-    //         std::cout << "Skipping DEAD organism at ("
-    //                   << org->getPosition().x << "," << org->getPosition().y << ")" << std::endl;
-    //         continue;
-    //     }
-
-    //     // === ORGANIZM ŻYWY - RYSUJEMY! ===
-    //     organismCount++;
-
-    //     Position pos = org->getPosition();
-    //     Color c = org->getColor();
-
-    //     std::cout << "Drawing organism #" << organismCount << " at ("
-    //               << pos.x << "," << pos.y << ") Color: ("
-    //               << c.r << "," << c.g << "," << c.b << ")" << std::endl;
-
-    //     // Powiększony rozmiar dla lepszej widoczności
-    //     int visualSize = org->getSize() * 4;
-    //     if (visualSize > tileSize - 2) visualSize = tileSize - 2;
-    //     if (visualSize < 8) visualSize = 8;  // Minimum 8 pikseli
-
-    //     int offset = (tileSize - visualSize) / 2;
-    //     int centerX = pos.x * tileSize + offset;
-    //     int centerY = pos.y * tileSize + offset;
-
-    //     // Rysuj kolorowe kółko
-    //     painter.setBrush(QColor(c.r, c.g, c.b));
-    //     painter.setPen(Qt::NoPen);
-    //     painter.drawEllipse(centerX, centerY, visualSize, visualSize);
-
-    //     // CZARNA obwódka dla WSZYSTKICH
-    //     painter.setPen(QPen(Qt::black, 3));
-    //     painter.setBrush(Qt::NoBrush);
-    //     painter.drawEllipse(centerX, centerY, visualSize, visualSize);
-
-    //     // Biała obwódka dla predatorów
-    //     if (dynamic_cast<Predator*>(org)) {
-    //         painter.setPen(QPen(Qt::white, 2));
-    //         painter.drawEllipse(centerX+2, centerY+2, visualSize-4, visualSize-4);
-    //     }
-
-    /*
-
-    std::cout << "=== TOTAL ORGANISMS DRAWN: " << organismCount << " ===" << std::endl;
-}*/

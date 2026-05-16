@@ -34,7 +34,7 @@ public:
     bool isRunning() const;
     bool isPaused()  const;
     long currentTick() const;
-void onTick();
+    void onTick();
     std::vector<Entity*> collectEntities() const;
 
     QString lastError() const { return error; }
