@@ -7,7 +7,7 @@
 Organism::Organism(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen)
     : Entity(pos, col), energy(startEnergy), maxEnergy(maxEn), isAlive(true), size(size), speed(speed),
     actionPoints(maxAP), maxActionPoints(maxAP), plannedPosition(pos), generation(gen),
-    previousPosition(pos), isMoving(false) {
+   lastPosition(pos), isMoving(false) {
 }
 
 void Organism::setEnergy(double newEnergy) {
@@ -65,7 +65,7 @@ void Organism::executeMovement(World* world) {
     if (!isAlive || actionPoints <= 0) return;
 
     if (position.x != plannedPosition.x || position.y != plannedPosition.y) {
-        // Sprawdzenie czy pozycja jest w granicach mapy
+
         if (plannedPosition.x < 0 || plannedPosition.x >= world->getWidth() ||
             plannedPosition.y < 0 || plannedPosition.y >= world->getHeight()) {
             plannedPosition = position;
@@ -73,16 +73,45 @@ void Organism::executeMovement(World* world) {
             return;
         }
 
-        // Sprawdzenie czy kafelek jest przechodzalny
+        // Sczy kafelek to nie blokada
         Tile* targetTile = world->getTile(plannedPosition);
         if (targetTile && !targetTile->isTraversable()) {
             plannedPosition = position;
             isMoving = false;
             return;
         }
+        //  by organizmy sie nie nakładały ale to tak srednio działa
+        Organism* occupant = world->getOrganismAt(plannedPosition);
+        if (occupant != nullptr && occupant != this) {
+            std::vector<Position> alternatives;
 
-        // Ruch jest dozwolony - zapisujemy poprzednią pozycję dla animacji
-        previousPosition = position;
+
+            for (int dy = -1; dy <= 1; dy++) {
+                for (int dx = -1; dx <= 1; dx++) {
+                    if (dx == 0 && dy == 0) continue;
+
+                    Position alt = {position.x + dx, position.y + dy};
+
+
+                    if (alt.x < 0 || alt.x >= world->getWidth() ||
+                        alt.y < 0 || alt.y >= world->getHeight()) {
+                        continue;
+                    }
+
+                    Tile* altTile = world->getTile(alt);
+                    if (!altTile || !altTile->isTraversable()) {
+                        continue;
+                    }
+
+
+                    if (world->getOrganismAt(alt) == nullptr) {
+                        alternatives.push_back(alt);
+                    }
+                }
+            }
+        }
+
+        lastPosition = position;
         position = plannedPosition;
         isMoving = true;
         actionPoints--;
@@ -90,7 +119,7 @@ void Organism::executeMovement(World* world) {
         // Koszt ruchu
         setEnergy(energy - 1.0);
 
-        // Natychmiastowe efekty tile po wejściu
+        //  efekty tile po wejściu
         if (targetTile) {
             targetTile->applyEffect(this);
         }

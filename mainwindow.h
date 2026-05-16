@@ -22,9 +22,12 @@ public:
     ~MainWindow() override;
 
 private slots:
-    void on_pushButton_clicked();   // Ręczny krok symulacji (Step)
-    void on_startButton_clicked();  // Rozpoczęcie symulacji (Start)
-    void on_stopButton_clicked();   // Zatrzymanie symulacji (Stop)
+    void on_resumeButton_clicked();
+    void on_startButton_clicked();
+    void on_stopButton_clicked();
+
+    void on_stepButton_clicked();
+    void on_pauseButton_clicked();
 
 
 private:

@@ -1,5 +1,6 @@
 #include "producer.h"
 #include "world.h"
+#include <iostream>
 #include <stdlib.h>
 
 Producer::Producer(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen, double prefTemp)
@@ -13,10 +14,10 @@ void Producer::onTick(World* world) {
         return;
     }
 
-    // Podstawowy koszt życia
+
     double baseCost = 1.0;
     
-    // Density-dependent mortality - większa populacja = większa śmiertelność
+   // większa populacja = większa śmiertelność
     int myPopulation = world->countPopulation<Producer>();
     double densityPenalty = 0.0;
     
@@ -48,43 +49,61 @@ void Producer::onInteract(Entity* other) {
 }
 
 
-std::unique_ptr<Organism> Producer::reproduce() {
-    // Niższy próg reprodukcji - 60% zamiast 80%
-    if (!isAlive || energy < (maxEnergy * 0.6)) {
-        return nullptr;
-    }
+std::unique_ptr<Organism> Producer::reproduce()
+{
+    if (!canReproduce()) return nullptr;
 
-    double energyGivenToChild = energy / 2.0;
-    setEnergy(energy - energyGivenToChild);
+    double childEnergy = energy * 0.4;
+    energy -= childEnergy;
 
-    int childGen = generation + 1;
-    Position childPos = {position.x + 1, position.y + 1};
+    Position childPos = position;
+    childPos.x += 1;
+
 
     double childMaxEn = maxEnergy;
     int childSize = size;
-    int childSpeed = speed;
     Color childColor = color;
+    double childPrefTemp = preferredTemperature;
 
-    // Mutacja co 10 pokoleń
-    if (childGen % 10 == 0) {
-        childMaxEn += 15.0;
-        childSize += 2;
-        childSpeed += 1;
-        childColor.r = std::min(255, childColor.r + 30);
-    } else {
-        childColor.g = std::max(50, childColor.g - 5);
+
+    if (rand() % 100 < 30) {
+        // Mutacja koloru
+        childColor.r += (rand() % 100) - 50;
+        childColor.g += (rand() % 100) - 50;
+        childColor.b += (rand() % 60) - 30;
+
+
+        if (childColor.r < 80) childColor.r = 80;
+        if (childColor.r > 255) childColor.r = 255;
+        if (childColor.g < 150) childColor.g = 150;
+        if (childColor.g > 255) childColor.g = 255;
+        if (childColor.b < 20) childColor.b = 20;
+        if (childColor.b > 120) childColor.b = 120;
+
+        // Mutacja rozmiaru
+        int sizeChange = (rand() % 5) - 2;
+        childSize += sizeChange;
+        if (childSize < 1) childSize = 1;
+        if (childSize > 6) childSize = 6;
+
+        // Mutacja energii
+        int energyChange = (rand() % 80) - 40;
+        childMaxEn += energyChange;
+        if (childMaxEn < 100) childMaxEn = 100;
+        if (childMaxEn > 450) childMaxEn = 450;
+
     }
 
     return std::make_unique<Producer>(
         childPos,
         childColor,
-        energyGivenToChild,
+        childEnergy,
         childMaxEn,
         childSize,
-        childSpeed,
+        speed,
         maxActionPoints,
-        childGen,
-        preferredTemperature
+        generation + 1,
+        childPrefTemp
         );
 }
 void Producer::photosynthesize(double amount) {

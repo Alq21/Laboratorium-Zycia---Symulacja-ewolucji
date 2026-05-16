@@ -1,8 +1,5 @@
 #include "mainwindow.h"
-#include "organism.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
-#include <QTimer>
 #include <QFile>
 #include <iostream>
 
@@ -12,63 +9,32 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-
     simApp = new SimulationApp(this);
 
-    QTimer *updateTimer = new QTimer(this);
-    connect(updateTimer, &QTimer::timeout, this, [this](){
-        if (simApp && simApp->isRunning()) {
-            auto entities = simApp->collectEntities();
-
-            std::cout << "\n[MainWindow] Updating board with " << entities.size() << " entities" << std::endl;
-
-            // Policz organizmy
-            int orgCount = 0;
-            for (auto* e : entities) {
-                if (Organism* org = dynamic_cast<Organism*>(e)) {
-                    if (org->getIsAlive()) {
-                        orgCount++;
-                        std::cout << "  Organism at (" << org->getPosition().x << "," << org->getPosition().y << ")" << std::endl;
-                    }
-                }
-            }
-            std::cout << "  Total organisms to draw: " << orgCount << std::endl;
-
-            ui->boardWidget->setEntities(entities);
-        }
-    });
-    updateTimer->start(300);
-    //
-
-    // POŁĄCZENIE: Kiedy symulacja zrobi krok, Twoja plansza dostaje dane
-    connect(simApp, &SimulationApp::tickCompleted, this, [this](long tick) {
-        auto entities = simApp->collectEntities();
-
-        if (ui->boardWidget) {
-            ui->boardWidget->setEntities(entities);
-            // Wymuszamy przerysowanie, gdyby update() wewnątrz setEntities nie wystarczył
-            ui->boardWidget->repaint();
-        }
-    });
-
-    // Obsługa błędów
-    connect(simApp, &SimulationApp::errorOccurred, this, [](const QString& msg) {
-        qDebug() << "Błąd symulacji:" << msg;
-    });
-
-    // Ładowanie konfiguracji
-    if (simApp->loadFromFile("example_config.json")) {
-        qDebug() << "Konfiguracja załadowana pomyślnie.";
-
-        // WYMUSZENIE PIERWSZEGO WIDOKU:
-        // Czekamy 100ms, aż UI się ułoży i pobieramy startowe encje
-        QTimer::singleShot(100, this, [this](){
-            auto entities = simApp->collectEntities();
-            ui->boardWidget->setEntities(entities);
-        });
+    // Załaduj config
+    QString configPath = "example_config.json";
+    if (!QFile::exists(configPath)) {
+        configPath = QString(SOURCE_DIR) + "/example_config.json";
     }
 
-    resize(800, 800);
+    if (simApp->loadFromFile(configPath)) {
+        std::cout << "Config loaded successfully!" << std::endl;
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    } else {
+        std::cout << "ERROR: " << simApp->lastError().toStdString() << std::endl;
+    }
+
+
+    ui->boardWidget->setSimApp(simApp);
+
+
+    connect(simApp, &SimulationApp::tickCompleted, this, [this](long tick){
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    });
+
+    resize(900, 780);
 }
 
 MainWindow::~MainWindow()
@@ -78,27 +44,44 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    if (!simApp->isRunning()) {
-        simApp->start();
-    } else if (simApp->isPaused()) {
-        simApp->resume();
+    if (simApp) {
+        std::cout << "START clicked" << std::endl;
+        simApp->startSimulation();
     }
 }
 
 void MainWindow::on_stopButton_clicked()
 {
-    if (simApp) simApp->stop();
+    if (simApp) {
+        std::cout << "STOP clicked" << std::endl;
+        simApp->stopSimulation();
+    }
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_pauseButton_clicked()
 {
     if (simApp) {
-        simApp->onTick();}
+        std::cout << "PAUSE clicked" << std::endl;
+        simApp->pauseSimulation();
+    }
+}
 
-      // (const auto& org : engine->getWorld()->getOrganisms()) {
-      //       entitiesToDraw.push_back(org.get());
-      //   }        std::vector<Entity*> entitiesToDraw;
-      //   for
+void MainWindow::on_resumeButton_clicked()
+{
+    if (simApp) {
+        std::cout << "RESUME clicked" << std::endl;
+        simApp->resumeSimulation();
+    }
+}
 
-      //   ui->boardWidget->setEntities(entitiesToDraw);
+void MainWindow::on_stepButton_clicked()
+{
+    if (simApp) {
+        std::cout << "STEP clicked" << std::endl;
+        simApp->stepSimulation();
+
+        // Odśwież widok
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    }
 }

@@ -12,7 +12,7 @@ Thermophile::Thermophile(Position pos, Color col, double startEnergy, double max
 void Thermophile::onTick(World* world) {
     if (!isAlive) return;
 
-    // POBIERA ZSUMOWANE PARAMETRY ŚRODOWISKA (Globalne + Lokalne kafelka)
+    // PARAMETRY ŚRODOWISKA (Globalne + Lokalne kafelka)
     EnvironmentParameters currentConditions = world->getCombinedParameters(position);
 
     double currentTemp = currentConditions.getTemperature();
@@ -24,7 +24,7 @@ void Thermophile::onTick(World* world) {
         setEnergy(energy - (tempDifference * 0.2));
     }
 
-    // Density-dependent mortality
+
     int myPopulation = world->countPopulation<Thermophile>();
     double densityPenalty = 0.0;
     
@@ -39,46 +39,54 @@ void Thermophile::onTick(World* world) {
     Producer::onTick(world);
 }
 
-std::unique_ptr<Organism> Thermophile::reproduce() {
-    // Niższy próg reprodukcji - 60% zamiast 80%
-    if (!isAlive || energy < (maxEnergy * 0.6)) {
-        return nullptr;
-    }
+std::unique_ptr<Organism> Thermophile::reproduce()
+{
+    if (!canReproduce()) return nullptr;
 
-    double energyGivenToChild = energy / 2.0;
-    setEnergy(energy - energyGivenToChild);
 
-    int childGen = generation + 1;
-    Position childPos = {position.x + 1, position.y + 1};
+    double childEnergy = energy * 0.4;
+    energy -= childEnergy;
+
+    Position childPos = position;
+    childPos.x += 1;
+
 
     double childMaxEn = maxEnergy;
     int childSize = size;
-    int childSpeed = speed;
     Color childColor = color;
 
-    // Pełny system ewolucji
-    if (childGen % 10 == 0) {
-        childMaxEn += 15.0;
-        childSize += 2;
-        childSpeed += 1;
-        childColor.r = std::min(255, childColor.r + 40);
-        childColor.b = std::max(0, childColor.b - 20);
-    } else {
-        childColor.r = std::min(255, childColor.r + 2);
+    // 30% szansa na mutację
+    if (rand() % 100 < 30) {
+        // Mutacja koloru
+        childColor.r = 200 + (rand() % 56);
+        childColor.g = 100 + (rand() % 100);
+        childColor.b = 20 + (rand() % 80);
+
+        // Mutacja rozmiaru
+        int sizeChange = (rand() % 5) - 2;
+        childSize += sizeChange;
+        if (childSize < 1) childSize = 1;
+        if (childSize > 6) childSize = 6;
+
+        // Mutacja energii
+        int energyChange = (rand() % 80) - 40;
+        childMaxEn += energyChange;
+        if (childMaxEn < 100) childMaxEn = 100;
+        if (childMaxEn > 450) childMaxEn = 450;
+
     }
 
     return std::make_unique<Thermophile>(
         childPos,
         childColor,
-        energyGivenToChild,
+        childEnergy,
         childMaxEn,
         childSize,
-        childSpeed,
+        speed,
         maxActionPoints,
-        childGen
+        generation + 1
         );
 }
-
 
 
 

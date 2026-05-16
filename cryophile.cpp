@@ -20,7 +20,6 @@ void Cryophile::onTick(World* world) {
         setEnergy(energy - (tempDifference * 0.2));
     }
 
-    // Density-dependent mortality
     int myPopulation = world->countPopulation<Cryophile>();
     double densityPenalty = 0.0;
     
@@ -79,38 +78,51 @@ std::unique_ptr<Organism> Cryophile::reproduce() {
         return nullptr;
     }
 
-    double energyGivenToChild = energy / 2.0;
-    setEnergy(energy - energyGivenToChild);
-
-    int childGen = generation + 1;
-    Position childPos = {position.x - 1, position.y - 1};
-
-    double childMaxEn = maxEnergy;
-    int childSize = size;
-    int childSpeed = speed;
-    Color childColor = color;
 
 
-    if (childGen % 10 == 0) {
-        childMaxEn += 15.0;
-        childSize += 2;
-        childSpeed += 1;
 
-        childColor.b = std::min(255, childColor.b + 40);
-        childColor.r = std::max(0, childColor.r - 20);
-    } else {
+        // Koszt
+        double childEnergy = energy * 0.4;
+        energy -= childEnergy;
 
-        childColor.b = std::min(255, childColor.b + 2);
-    }
+        Position childPos = position;
+        childPos.x += 1;
 
-    return std::make_unique<Cryophile>(
-        childPos,
-        childColor,
-        energyGivenToChild,
-        childMaxEn,
-        childSize,
-        childSpeed,
-        maxActionPoints,
-        childGen
-        );
+        // mutacje
+        double childMaxEn = maxEnergy;
+        int childSize = size;
+        Color childColor = color;
+
+        if (rand() % 100 < 30) {
+            // Mutacja koloru
+            childColor.r = 50 + (rand() % 100);
+            childColor.g = 150 + (rand() % 106);
+            childColor.b = 200 + (rand() % 56);
+
+            // Mutacja rozmiaru
+            int sizeChange = (rand() % 5) - 2;
+            childSize += sizeChange;
+            if (childSize < 1) childSize = 1;
+            if (childSize > 6) childSize = 6;
+
+            // Mutacja energii
+            int energyChange = (rand() % 80) - 40;
+            childMaxEn += energyChange;
+            if (childMaxEn < 100) childMaxEn = 100;
+            if (childMaxEn > 450) childMaxEn = 450;
+
+
+        }
+
+        return std::make_unique<Cryophile>(
+            childPos,
+            childColor,
+            childEnergy,
+            childMaxEn,
+            childSize,
+            speed,
+            maxActionPoints,
+            generation + 1
+            );
+
 }

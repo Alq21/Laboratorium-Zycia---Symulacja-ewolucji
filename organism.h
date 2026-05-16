@@ -20,7 +20,7 @@ protected:
     int generation;
     
     // Dla płynnej animacji ruchu
-    Position previousPosition;
+    Position lastPosition;
     bool isMoving;
 
 public:
@@ -50,9 +50,9 @@ public:
 
     int getSpeed() const;
     
-    // Dla płynnej animacji
-    Position getPreviousPosition() const { return previousPosition; }
+
     bool getIsMoving() const { return isMoving; }
+     Position getLastPosition() const { return lastPosition; }
 
 };
 

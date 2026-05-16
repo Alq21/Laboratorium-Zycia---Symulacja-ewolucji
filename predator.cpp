@@ -33,7 +33,7 @@ Position Predator::findNearestPrey(World* world) {
 void Predator::onTick(World* world) {
     if (!isAlive) return;
 
-    // Density-dependent mortality dla drapieżników
+
     int myPopulation = world->countPopulation<Predator>();
     double densityPenalty = 0.0;
     
@@ -94,42 +94,53 @@ bool Predator::canReproduce() const {
     return isAlive && (energy >= 150.0);
 }
 
-std::unique_ptr<Organism> Predator::reproduce() {
-    if (!canReproduce()) {
-        return nullptr;
-    }
+std::unique_ptr<Organism> Predator::reproduce()
+{
+    if (!canReproduce()) return nullptr;
 
-    double energyGivenToChild = energy / 2.0;
-    setEnergy(energy - energyGivenToChild);
+    double childEnergy = energy * 0.5;
+    energy -= childEnergy;
 
-    int childGen = generation + 1;
-    Position childPos = {position.x - 1, position.y - 1};
+    Position childPos = position;
+    childPos.x += 1;
 
     double childMaxEn = maxEnergy;
-    int childSize = size;
-    int childSpeed = speed;
     int childVision = visionRange;
+    int childSpeed = speed;
+    int childSize = size;
     Color childColor = color;
 
-    if (childGen % 10 == 0) {
-        childMaxEn += 20.0;
-        childSize += 3;
-        childSpeed += 2;
-        childVision += 2;
-        childColor.b = std::min(255, childColor.b + 50);
-    } else {
-        childColor.r = std::max(100, childColor.r - 5);
+
+    if (rand() % 100 < 25) {
+        // Mutacja koloru
+        childColor.r = 200 + (rand() % 56);
+        childColor.g = rand() % 100;
+        childColor.b = rand() % 100;
+
+        // Mutacja rozmiaru
+        int sizeChange = (rand() % 3) - 1;
+        childSize += sizeChange;
+        if (childSize < 2) childSize = 2;
+        if (childSize > 5) childSize = 5;
+
+        // Mutacja wzroku
+        int visionChange = (rand() % 5) - 2;  // -2 do +2
+        childVision += visionChange;
+        if (childVision < 3) childVision = 3;
+        if (childVision > 15) childVision = 15;
+
+
     }
 
     return std::make_unique<Predator>(
         childPos,
         childColor,
-        energyGivenToChild,
+        childEnergy,
         childMaxEn,
         childSize,
         childSpeed,
         maxActionPoints,
-        childGen,
+        generation + 1,
         childVision
         );
 }

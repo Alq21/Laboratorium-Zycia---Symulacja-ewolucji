@@ -5,6 +5,7 @@
 #include <memory>
 #include "environmentparameters.h"
 #include "position.h"
+#include "organism.h"
 
 class Tile;
 class Organism;

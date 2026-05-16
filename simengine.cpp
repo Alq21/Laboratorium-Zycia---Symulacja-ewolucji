@@ -1,7 +1,12 @@
 #include "simengine.h"
+#include "cryophile.h"
+#include "predator.h"
+#include "producer.h"
+#include "thermophile.h"
 #include "world.h"
 #include "organism.h"
 #include "tile.h"
+#include <iostream>
 // #include "statmanager.h"
 // #include "producer.h"
 // #include "predator.h"
@@ -11,7 +16,7 @@ SimEngine::SimEngine(World* w, StatManager* stats)
     statistics(stats),
     currentTick(0)
 {
-    status.setState(SimulationState::STOPPED);
+    status.setState(SimulationState::RUNNING);
 }
 
 void SimEngine::step()
@@ -29,6 +34,7 @@ void SimEngine::step()
     
     world->removeDead();
     currentTick++;
+    std::cout << "Step completed, tick now: " << currentTick << std::endl;
 }
 
 void SimEngine::pause()
@@ -43,23 +49,21 @@ void SimEngine::resume()
 
 void SimEngine::processMovementPlanning()
 {
-    for(const auto& organism : world->getOrganisms())
-    {
-        if(organism->getIsAlive())
-        {
-            organism->planMove(world);
-        }
+    for (auto& organism : world->getOrganisms()) {
+        if (!organism) continue;  // <- DODAJ
+        if (!organism->getIsAlive()) continue;  // <- DODAJ
+
+        organism->planMove(world);
     }
 }
 
 void SimEngine::processMovementExecution()
 {
-    for(const auto& organism : world->getOrganisms())
-    {
-        if(organism->getIsAlive())
-        {
-            organism->executeMovement(world);
-        }
+    for (auto& organism : world->getOrganisms()) {
+        if (!organism) continue;  // <- DODAJ
+        if (!organism->getIsAlive()) continue;  // <- DODAJ
+
+        organism->executeMovement(world);
     }
 }
 
@@ -81,7 +85,7 @@ void SimEngine::processInteractions()
 void SimEngine::processTileEffects()
 {
     for(const auto& organism : world->getOrganisms())
-    {
+    {if (!organism) continue;
         if(!organism->getIsAlive()) continue;
 
         Tile* tile = world->getTile(organism->getPosition());
@@ -104,43 +108,81 @@ void SimEngine::processEnergy()
 }
 
 
+//to musze sie zastanowić czy ma sens, ale liczenie populacji przyda sie do statystyk
+void SimEngine::processReproduction()
+{
+    std::vector<std::unique_ptr<Organism>> newborns;
 
-    void SimEngine::processReproduction()
-    {
-        std::vector<std::unique_ptr<Organism>> newborns;
+    // liczy populacje według typu
+    int producers = 0, predators = 0, thermophiles = 0, cryophiles = 0;
+    int totalAlive = 0;
 
-        // Policz żywe organizmy
-        int aliveCount = 0;
-        for(const auto& org : world->getOrganisms()) {
-            if(org->getIsAlive()) aliveCount++;
-        }
+    for (const auto& org : world->getOrganisms()) {
+        if (!org || !org->getIsAlive()) continue;
 
-        // Jeśli przeludnienie (>50 organizmów), zwiększ śmiertelność
-        bool overpopulation = aliveCount > 20;
+        totalAlive++;
 
-        for(const auto& organism : world->getOrganisms())
-        {
-            if(!organism->getIsAlive()) continue;
-
-            // Przeludnienie = dodatkowa utrata energii
-            if (overpopulation) {
-                organism->setEnergy(organism->getEnergy() - 2.0);
-            }
-
-            if(organism->canReproduce())
-            {
-                auto child = organism->reproduce();
-                if(child) {
-                    newborns.push_back(std::move(child));
-                }
-            }
-        }
-
-        for(auto& newborn : newborns) {
-            world->addOrganism(std::move(newborn));
+        if (dynamic_cast<Producer*>(org.get())) {
+            producers++;
+        } else if (dynamic_cast<Predator*>(org.get())) {
+            predators++;
+        } else if (dynamic_cast<Thermophile*>(org.get())) {
+            thermophiles++;
+        } else if (dynamic_cast<Cryophile*>(org.get())) {
+            cryophiles++;
         }
     }
 
+
+
+    // progi
+    bool totalOverpop = totalAlive > 80;
+    bool producerOverpop = producers > 25;
+    bool predatorOverpop = predators > 12;
+    bool thermoOverpop = thermophiles > 15;
+    bool cryoOverpop = cryophiles > 15;
+
+
+    for (const auto& organism : world->getOrganisms()) {
+        if (!organism || !organism->getIsAlive()) continue;
+
+
+        if (dynamic_cast<Producer*>(organism.get()) && producerOverpop) {
+            organism->setEnergy(organism->getEnergy() - 7.0);
+            std::cout << "Producer overpop penalty!" << std::endl;
+        }
+        else if (dynamic_cast<Predator*>(organism.get()) && predatorOverpop) {
+            organism->setEnergy(organism->getEnergy() - 10.0);
+            std::cout << "Predator overpop penalty!" << std::endl;
+        }
+        else if (dynamic_cast<Thermophile*>(organism.get()) && thermoOverpop) {
+            organism->setEnergy(organism->getEnergy() - 7.0);
+        }
+        else if (dynamic_cast<Cryophile*>(organism.get()) && cryoOverpop) {
+            organism->setEnergy(organism->getEnergy() - 7.0);
+        }
+
+
+        if (totalOverpop) {
+            organism->setEnergy(organism->getEnergy() - 15.0);
+        }
+
+
+        if (organism->canReproduce()) {
+            auto child = organism->reproduce();
+            if (child) {
+                newborns.push_back(std::move(child));
+            }
+        }
+    }
+
+    // Dodaj nowe organizmy
+    for (auto& newborn : newborns) {
+        if (newborn) {
+            world->addOrganism(std::move(newborn));
+        }
+    }
+}
 
 // void SimEngine::cleanup()
 // {
