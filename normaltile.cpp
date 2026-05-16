@@ -1,6 +1,6 @@
 #include "normaltile.h"
 
-NormalTile::NormalTile(Position pos) : Tile(pos, Color(180, 200, 170)) {}
+NormalTile::NormalTile(Position pos) : Tile(pos, Color(30, 30, 30)) {}
 
 void NormalTile::applyEffect(Organism* organism) {
 }

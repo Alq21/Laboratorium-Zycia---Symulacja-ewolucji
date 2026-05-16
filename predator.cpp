@@ -84,7 +84,7 @@ void Predator::onInteract(Entity* other) {
 
 void Predator::hunt(Organism* target) {
     if (target && target->getIsAlive()) {
-        double stolenEnergy = target->getEnergy() / 2.0;
+        double stolenEnergy = target->getEnergy() / 1.5;
         target->setEnergy(target->getEnergy() - stolenEnergy);
         this->setEnergy(this->energy + stolenEnergy);
     }

@@ -12,9 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Inicjalizacja aplikacji symulacyjnej kolegi
+
     simApp = new SimulationApp(this);
-    //
+
     QTimer *updateTimer = new QTimer(this);
     connect(updateTimer, &QTimer::timeout, this, [this](){
         if (simApp && simApp->isRunning()) {
@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
             ui->boardWidget->setEntities(entities);
         }
     });
-    updateTimer->start(100);
+    updateTimer->start(300);
     //
 
     // POŁĄCZENIE: Kiedy symulacja zrobi krok, Twoja plansza dostaje dane
@@ -87,7 +87,7 @@ void MainWindow::on_startButton_clicked()
 
 void MainWindow::on_stopButton_clicked()
 {
-    if (simApp) simApp->pause();
+    if (simApp) simApp->stop();
 }
 
 void MainWindow::on_pushButton_clicked()

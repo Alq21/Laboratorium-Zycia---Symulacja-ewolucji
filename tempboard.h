@@ -1,7 +1,7 @@
 
 #ifndef TEMPBOARD_H
 #define TEMPBOARD_H
-
+#include <QTimer>
 #include <QWidget>
 #include <vector>
 #include "entity.h"
@@ -18,11 +18,14 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
-
+private slots:
+    void animationTick();
 private:
     std::vector<Entity*> entities;
     int tileSize;
     int step, maxStep;
+    QTimer* animTimer;
+    double  t;
 };
 
 #endif

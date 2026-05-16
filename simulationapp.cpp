@@ -14,7 +14,7 @@ SimulationApp::SimulationApp(QObject* parent)
     , builder(std::make_unique<SimulationBuilder>())
 {
     tickTimer = new QTimer(this);
-      tickIntervalMs = 500;
+      tickIntervalMs = 600;
     tickTimer->setInterval(tickIntervalMs);
     connect(tickTimer, &QTimer::timeout, this, &SimulationApp::onTick);
 }
