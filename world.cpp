@@ -6,6 +6,7 @@
 #include "impassabletile.h"
 #include "predator.h"
 #include "producer.h"
+#include "movementplanning.h"
 #include "tile.h"
 #include <cstdlib>
 #include <ctime>
@@ -13,6 +14,17 @@
 #include <qdebug.h>
 #include <qlogging.h>
 
+namespace {
+constexpr double ColdTemperatureModifier = -25.0;
+constexpr double WarmTemperatureModifier = 25.0;
+constexpr double ColdNeighborThreshold = -10.0;
+constexpr double WarmNeighborThreshold = 10.0;
+
+void applyTemperatureBiome(Tile* tile, double temperatureModifier) {
+    if (!tile) return;
+    tile->getLocalModifiers().modifyParameter("temperature", temperatureModifier);
+}
+}
 
 World::World(int w, int h, MapConfig config) : width(w), height(h) {
     std::srand(std::time(nullptr));
@@ -65,30 +77,82 @@ void World::generateMap(const MapConfig& config) {
             else {
                 habitat[y].push_back(std::make_unique<ImpassableTile>(pos));
             }
+
+            int weightTemperate = config.baseTemperateWeight;
+            int weightCold = config.baseColdWeight;
+            int weightWarm = config.baseWarmWeight;
+
+            if (x > 0) {
+                double leftTemp = habitat[y][x - 1]->getLocalModifiers().getTemperature();
+                if (leftTemp <= ColdNeighborThreshold) weightCold += config.temperatureClusterBonus;
+                else if (leftTemp >= WarmNeighborThreshold) weightWarm += config.temperatureClusterBonus;
+            }
+
+            if (y > 0) {
+                double topTemp = habitat[y - 1][x]->getLocalModifiers().getTemperature();
+                if (topTemp <= ColdNeighborThreshold) weightCold += config.temperatureClusterBonus;
+                else if (topTemp >= WarmNeighborThreshold) weightWarm += config.temperatureClusterBonus;
+            }
+
+            int totalTemperatureWeight = weightTemperate + weightCold + weightWarm;
+            int temperatureRoll = std::rand() % totalTemperatureWeight;
+            double temperatureModifier = 0.0;
+
+            if (temperatureRoll < weightCold) {
+                temperatureModifier = ColdTemperatureModifier;
+            }
+            else if (temperatureRoll < weightCold + weightWarm) {
+                temperatureModifier = WarmTemperatureModifier;
+            }
+
+            applyTemperatureBiome(habitat[y].back().get(), temperatureModifier);
         }
     }
 }
+Position World::findFreeTraversablePosition() const {
+    // Próbuj losowe pozycje, maks. 500 prób, żeby uniknąć nieskończonej pętli
+    for (int attempt = 0; attempt < 500; ++attempt) {
+        int rx = std::rand() % width;
+        int ry = std::rand() % height;
+        Position pos{rx, ry};
+        Tile* tile = getTile(pos);
+        if (tile && tile->isTraversable() && getOrganismAt(pos) == nullptr) {
+            return pos;
+        }
+    }
+    // Jeśli nie znaleziono losowo, szukaj liniowo
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            Position pos{x, y};
+            Tile* tile = getTile(pos);
+            if (tile && tile->isTraversable() && getOrganismAt(pos) == nullptr) {
+                return pos;
+            }
+        }
+    }
+    return Position{-1, -1}; // Brak wolnego miejsca
+}
+
 void World::populate(int numProducers, int numPredators) {
     // Zaludniamy świat Producentami
     for (int i = 0; i < numProducers; ++i) {
-        int randomX = std::rand() % width;
-        int randomY = std::rand() % height;
-        Position randomPos{randomX, randomY};
+        Position pos = findFreeTraversablePosition();
+        if (pos.x < 0) { qDebug() << "populate: brak wolnego miejsca dla Producenta"; break; }
 
         auto producer = std::make_unique<Producer>(
-            randomPos, Color{0, 255, 0}, 50.0, 100.0, 1, 1, 1, 1, 20.0
+            pos, Color{0, 255, 0}, 50.0, 100.0, 1, 1, 1, 1
             );
         addOrganism(std::move(producer));
     }
 
     // Zaludniamy świat Drapieżnikami
     for (int i = 0; i < numPredators; ++i) {
-        int randomX = std::rand() % width;
-        int randomY = std::rand() % height;
-        Position randomPos{randomX, randomY};
+        Position pos = findFreeTraversablePosition();
+        if (pos.x < 0) { qDebug() << "populate: brak wolnego miejsca dla Drapieżnika"; break; }
 
         auto predator = std::make_unique<Predator>(
-            randomPos, Color{255, 0, 0}, 100.0, 200.0, 1, 1, 1, 1, 5
+            pos, Color{255, 0, 0}, 100.0, 200.0, 1, 1, 1, 1,
+            MovementPlanning::minimumPredatorVisionRadius()
             );
         addOrganism(std::move(predator));
     }
@@ -126,12 +190,20 @@ void World::setTile(Position p, std::unique_ptr<Tile> newTile) {
             return;
         }
 
-        // Sprawdź czy pozycja jest już zajęta
+        // Walidacja traversowalności kafelka
+        Tile* tile = getTile(pos);
+        if (tile && !tile->isTraversable()) {
+            qDebug() << "  ✗ Organism at (" << pos.x << "," << pos.y
+                     << ") targets an impassable tile — rejected";
+            return;
+        }
+
+        // Sprawdź czy pozycja jest już zajęta — twardo odrzuć nakładanie
         for (const auto& existing : organisms) {
-            if (existing->getPosition() == pos) {
-                qDebug() << "   WARNING: Position (" << pos.x << "," << pos.y
-                         << ") is already occupied! Organisms will overlap.";
-                break;
+            if (existing->getIsAlive() && existing->getPosition() == pos) {
+                qDebug() << "  ✗ Position (" << pos.x << "," << pos.y
+                         << ") already occupied — organism rejected to prevent overlap";
+                return;
             }
         }
 
@@ -150,13 +222,18 @@ Organism* World::getOrganismAt(Position p) const {
 }
 
 void World::removeDead() {
+    recentDeaths_.clear();
+    for (const auto& org : organisms)
+        if (!org->getIsAlive())
+            recentDeaths_.push_back(org->getPosition());
+
     organisms.erase(
         std::remove_if(organisms.begin(), organisms.end(),
         [](const std::unique_ptr<Organism>& o) {
-        return !o->getIsAlive();
+            return !o->getIsAlive();
         }),
         organisms.end()
-        );
+    );
 }
 void World::setGlobalParameters(EnvironmentParameters parameters) {
     globalParameters = parameters;

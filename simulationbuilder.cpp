@@ -2,8 +2,8 @@
 #include "world.h"
 #include "predator.h"
 #include "producer.h"
-#include "thermophile.h"
-#include "cryophile.h"
+#include "omnivore.h"
+#include "movementplanning.h"
 #include "entity.h"
 #include <QFile>
 #include <QJsonDocument>
@@ -17,13 +17,35 @@ static MapConfig parseMapConfig(const QJsonObject& obj) {
     if (obj.contains("basePoisonWeight")) cfg.basePoisonWeight = obj["basePoisonWeight"].toInt(cfg.basePoisonWeight);
     if (obj.contains("baseImpassableWeight")) cfg.baseImpassableWeight = obj["baseImpassableWeight"].toInt(cfg.baseImpassableWeight);
     if (obj.contains("clusterBonus")) cfg.clusterBonus = obj["clusterBonus"].toInt(cfg.clusterBonus);
+    if (obj.contains("baseTemperateWeight")) cfg.baseTemperateWeight = obj["baseTemperateWeight"].toInt(cfg.baseTemperateWeight);
+    if (obj.contains("baseColdWeight")) cfg.baseColdWeight = obj["baseColdWeight"].toInt(cfg.baseColdWeight);
+    if (obj.contains("baseWarmWeight")) cfg.baseWarmWeight = obj["baseWarmWeight"].toInt(cfg.baseWarmWeight);
+    if (obj.contains("temperatureClusterBonus")) cfg.temperatureClusterBonus = obj["temperatureClusterBonus"].toInt(cfg.temperatureClusterBonus);
     return cfg;
+}
+
+static TemperaturePreference parseTemperaturePreference(const QString& rawValue,
+                                                        TemperaturePreference fallback = TemperaturePreference::Default) {
+    QString value = rawValue.toLower();
+
+    if (value == "cryophile" || value == "cryo" || value == "cold") {
+        return TemperaturePreference::Cryophile;
+    }
+    if (value == "thermophile" || value == "termophile" || value == "temophile" || value == "warm") {
+        return TemperaturePreference::Thermophile;
+    }
+    if (value == "default" || value == "normal" || value.isEmpty()) {
+        return fallback;
+    }
+
+    return fallback;
 }
 
 // Parse one organism entry from the "organisms" JSON array.
 static OrganismSpawnConfig parseOrganism(const QJsonObject& obj) {
     OrganismSpawnConfig cfg;
-    cfg.type = obj["type"].toString("producer").toStdString();
+    QString type = obj["type"].toString("producer").toLower();
+    cfg.type = type.toStdString();
     cfg.x = obj["x"].toInt(0);
     cfg.y = obj["y"].toInt(0);
     cfg.startEnergy = obj["startEnergy"].toDouble(cfg.startEnergy);
@@ -32,7 +54,20 @@ static OrganismSpawnConfig parseOrganism(const QJsonObject& obj) {
     cfg.speed = obj["speed"].toInt(cfg.speed);
     cfg.maxAP = obj["maxAP"].toInt(cfg.maxAP);
     cfg.vision = obj["vision"].toInt(cfg.vision);
-    cfg.preferredTemperature = obj["preferredTemperature"].toDouble(cfg.preferredTemperature);
+
+    if (type == "cryophile") {
+        cfg.type = "producer";
+        cfg.temperaturePreference = TemperaturePreference::Cryophile;
+    } else if (type == "thermophile" || type == "termophile" || type == "temophile") {
+        cfg.type = "producer";
+        cfg.temperaturePreference = TemperaturePreference::Thermophile;
+    }
+
+    if (obj.contains("temperaturePreference")) {
+        cfg.temperaturePreference = parseTemperaturePreference(obj["temperaturePreference"].toString(),
+                                                              cfg.temperaturePreference);
+    }
+
     return cfg;
 }
 
@@ -49,7 +84,8 @@ std::unique_ptr<Organism> SimulationBuilder::makeOrganism(const OrganismSpawnCon
             cfg.speed,
             cfg.maxAP,
             0,
-            cfg.vision
+            cfg.vision,
+            cfg.temperaturePreference
             );
     }
 
@@ -63,37 +99,27 @@ std::unique_ptr<Organism> SimulationBuilder::makeOrganism(const OrganismSpawnCon
             cfg.speed,
             cfg.maxAP,
             0,
-            cfg.preferredTemperature
+            cfg.temperaturePreference
             );
     }
 
-    if (cfg.type == "thermophile") {
-        return std::make_unique<Thermophile>(
+    if (cfg.type == "omnivore") {
+        const int vision = cfg.vision > 0 ? cfg.vision : MovementPlanning::minimumPredatorVisionRadius();
+        return std::make_unique<Omnivore>(
             pos,
-            Color{255, 100, 50},
+            Color{200, 160, 220},
             cfg.startEnergy,
             cfg.maxEnergy,
             cfg.size,
             cfg.speed,
             cfg.maxAP,
-            0
+            0,
+            vision,
+            cfg.temperaturePreference
             );
     }
 
-    if (cfg.type == "cryophile") {
-        return std::make_unique<Cryophile>(
-            pos,
-            Color{50, 150, 255},
-            cfg.startEnergy,
-            cfg.maxEnergy,
-            cfg.size,
-            cfg.speed,
-            cfg.maxAP,
-            0
-            );
-    }
-
-    error = QString("SimulationBuilder: unknown organism type")
+    error = QString("SimulationBuilder: unknown organism type '%1'")
                 .arg(QString::fromStdString(cfg.type));
     return nullptr;
 }
@@ -105,7 +131,7 @@ WorldConfig SimulationBuilder::loadConfig(const QString& path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        error = QString("SimulationBuilder: cannot open config file ").arg(path);
+        error = QString("SimulationBuilder: cannot open config file '%1'").arg(path);
         return config;
     }
 
@@ -114,7 +140,7 @@ WorldConfig SimulationBuilder::loadConfig(const QString& path) {
     file.close();
 
     if (doc.isNull()) {
-        error = QString("SimulationBuilder: JSON parse error").arg(parseError.errorString());
+        error = QString("SimulationBuilder: JSON parse error: %1").arg(parseError.errorString());
         return config;
     }
 
@@ -191,6 +217,14 @@ void SimulationBuilder::queueSpawn(int x, int y, const QString& type) {
     cfg.type = type.toLower().toStdString();
     cfg.x    = x;
     cfg.y    = y;
+
+    if (cfg.type == "cryophile") {
+        cfg.type = "producer";
+        cfg.temperaturePreference = TemperaturePreference::Cryophile;
+    } else if (cfg.type == "thermophile" || cfg.type == "termophile" || cfg.type == "temophile") {
+        cfg.type = "producer";
+        cfg.temperaturePreference = TemperaturePreference::Thermophile;
+    }
 
     auto organism = makeOrganism(cfg);
     if (organism)

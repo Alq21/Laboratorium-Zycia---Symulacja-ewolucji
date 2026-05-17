@@ -3,16 +3,13 @@
 
 #include "organism.h"
 
-
 class Tile;
 
 class Producer : public Organism {
-protected:
-    double preferredTemperature;
-    double reproductionThreshold;
 public:
 
-   Producer(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen, double prefTemp);
+   Producer(Position pos, Color col, double startEnergy, double maxEn, int size, int speed, int maxAP, int gen,
+            TemperaturePreference tempPreference = TemperaturePreference::Default);
 
     virtual ~Producer() = default;
 
@@ -20,12 +17,12 @@ public:
     void planMove(World* world) override;
     void onInteract(Entity* other) override;
 
-    // bool canReproduce() const override;
-    virtual std::unique_ptr<Organism> reproduce() override;
+    bool canReproduce() const override;
+    std::unique_ptr<Organism> reproduce() override;
 
     void photosynthesize(double amount);
 
-
+    static int awarenessRadius();
 };
 
 #endif // PRODUCER_H
