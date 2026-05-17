@@ -1,17 +1,16 @@
-// #ifndef CRYOPHILE_H
-// #define CRYOPHILE_H
+#ifndef CRYOPHILE_H
+#define CRYOPHILE_H
 
-// #include "producer.h"
+#include "producer.h"
 
-// class Cryophile : public Producer {
-//     double preferredTemperature;
-// public:
-//     Cryophile(Position pos, Color col, double startEnergy, double maxEn, int startSize, int startSpeed, int maxAP, int gen);
-//     virtual ~Cryophile() = default;
+class Cryophile : public Producer {
+public:
+    Cryophile(Position pos, Color col, double startEnergy, double maxEn, int startSize, int startSpeed, int maxAP, int gen);
+    virtual ~Cryophile() = default;
 
-//     virtual void onTick(World* world) override;
-//     virtual void planMove(World* world) override;
-//     virtual std::unique_ptr<Organism> reproduce() override;
-// };
+    virtual void onTick(World* world) override;
+    virtual void planMove(World* world) override;
+    virtual std::unique_ptr<Organism> reproduce() override;
+};
 
-// #endif // CRYOPHILE_H
+#endif // CRYOPHILE_H
