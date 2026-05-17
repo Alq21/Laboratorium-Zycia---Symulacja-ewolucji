@@ -6,118 +6,109 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
-    <height>820</height>
+    <width>900</width>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Lab of Life</string>
+   <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="mainLayout">
-    <property name="spacing">
-     <number>6</number>
+   <widget class="QPushButton" name="stepButton">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
     </property>
-    <property name="margin" stdset="0">
-     <number>8</number>
+    <property name="text">
+     <string>Step</string>
     </property>
-    <item>
-     <layout class="QHBoxLayout" name="controlLayout">
-      <property name="margin" stdset="0">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="QPushButton" name="stepButton">
-        <property name="text">
-         <string>Krok</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="startButton">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pauseButton">
-        <property name="text">
-         <string>Pauza</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="showEnvironmentCheckBox">
-        <property name="text">
-         <string>Pokaż temperaturę</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tabSim">
-       <attribute name="title">
-        <string>Symulacja</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="simLayout">
-        <property name="margin" stdset="0">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="TempBoard" name="boardWidget" native="true">
-          <property name="styleSheet">
-           <string notr="true">border: 2px solid gray;</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tabStats">
-       <attribute name="title">
-        <string>Statystyki</string>
-       </attribute>
-       <layout class="QVBoxLayout" name="statsLayout">
-        <property name="margin" stdset="0">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="StatPanel" name="statsPanel" native="true"/>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </item>
-   </layout>
+   </widget>
+   <widget class="QPushButton" name="startButton">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>20</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
+   <widget class="TempBoard" name="boardWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>70</y>
+      <width>800</width>
+      <height>600</height>
+     </rect>
+    </property>
+    <property name="baseSize">
+     <size>
+      <width>1600</width>
+      <height>1200</height>
+     </size>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 2px solid gray;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stopButton">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>20</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="resumeButton">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>20</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Resume</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pauseButton">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>20</y>
+      <width>90</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Pause</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>960</width>
-     <height>22</height>
+     <width>900</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -128,12 +119,6 @@
    <class>TempBoard</class>
    <extends>QWidget</extends>
    <header>tempboard.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>StatPanel</class>
-   <extends>QWidget</extends>
-   <header>statpanel.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

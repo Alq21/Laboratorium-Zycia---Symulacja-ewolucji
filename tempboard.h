@@ -2,52 +2,27 @@
 #define TEMPBOARD_H
 
 #include <QWidget>
-#include <QTimer>
-#include <QList>
-#include <QPointF>
-#include "boardsnapshot.h"
+#include <vector>
 
+class Entity;
 class SimulationApp;
-
-// Cząsteczka animacji pękającej bańki
-struct DeathParticle {
-    QPointF center;     // środek w pikselach
-    qreal   progress;   // 0.0 → 1.0 (postęp animacji)
-    int     baseRadius; // promień startowy (odpowiada rozmiarowi organizmu)
-};
 
 class TempBoard : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TempBoard(QWidget* parent = nullptr);
-
-    void setSnapshot(const BoardSnapshot& newSnapshot);
+    explicit TempBoard(QWidget *parent = nullptr);
+    void setEntities(const std::vector<Entity*>& newEntities);
     void setSimApp(SimulationApp* app) { simApp = app; }
-    void setShowEnvironmentParameters(bool show);
-    bool showEnvironmentParameters() const { return showEnvironment; }
 
 protected:
-    void paintEvent(QPaintEvent* event) override;
-
-private slots:
-    void advanceParticles();
+    void paintEvent(QPaintEvent *event) override;
 
 private:
-    void drawDeathParticle(QPainter& p, const DeathParticle& dp) const;
-
-    BoardSnapshot snapshot;
+    std::vector<Entity*> entities;
     int tileSize = 20;
     SimulationApp* simApp = nullptr;
-    bool showEnvironment  = false;
-
-    // Animacja śmierci
-    QList<DeathParticle> deathParticles_;
-    QTimer*              animTimer_;
-
-    static constexpr int   ANIM_INTERVAL_MS = 16;   // ~60 fps
-    static constexpr qreal ANIM_STEP        = 0.055; // kroki postępu (~18 klatek)
 };
 
 #endif // TEMPBOARD_H

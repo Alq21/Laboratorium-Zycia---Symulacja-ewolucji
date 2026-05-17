@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "temperaturepreference.h"
 #include "world.h"
 
 struct OrganismSpawnConfig {
@@ -16,12 +15,12 @@ struct OrganismSpawnConfig {
     int    speed = 1;
     int    maxAP = 1;
     int    vision = 5;
-    TemperaturePreference temperaturePreference = TemperaturePreference::Default;
+    double preferredTemperature = 20.0;
 };
 
 struct WorldConfig {
-    int width = 100;
-    int height = 100;
+    int width = 80;
+    int height = 60;
     MapConfig mapConfig;
     std::vector<OrganismSpawnConfig> organisms;
 };
