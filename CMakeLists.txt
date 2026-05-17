@@ -9,29 +9,38 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Charts)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Charts)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
 
 file(GLOB SOURCES "*.cpp")
 file(GLOB HEADERS "*.h")
-file(GLOB FORMS   "*.ui")
+file(GLOB FORMS "*.ui")
 
+#
 add_executable(LifeLabolatory ${SOURCES} ${HEADERS} ${FORMS})
 
 target_include_directories(LifeLabolatory PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+target_include_directories(LifeLabolatory PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 add_compile_definitions(SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+configure_file(${CMAKE_SOURCE_DIR}/example_config.json
+               ${CMAKE_BINARY_DIR}/example_config.json COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/improved_config.json
                ${CMAKE_BINARY_DIR}/improved_config.json COPYONLY)
 
-target_link_libraries(LifeLabolatory PRIVATE
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Charts
-)
+target_link_libraries(LifeLabolatory PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
+# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
+# If you are developing for iOS or macOS you should consider setting an
+# explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
   set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.LifeLabolatory)
 endif()

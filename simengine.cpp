@@ -1,15 +1,11 @@
 #include "simengine.h"
+#include "cryophile.h"
 #include "predator.h"
 #include "producer.h"
-#include "omnivore.h"
+#include "thermophile.h"
 #include "world.h"
 #include "organism.h"
 #include "tile.h"
-
-#include <cmath>
-#include <cstdlib>
-#include <memory>
-#include <vector>
 
 SimEngine::SimEngine(World* w, StatManager* stats)
     : world(w),
@@ -34,6 +30,7 @@ void SimEngine::step()
         world->removeDead();
         currentTick++;
     } catch (...) {
+
         status.setState(SimulationState::PAUSED);
     }
 }
@@ -50,27 +47,14 @@ void SimEngine::resume()
 
 void SimEngine::processMovementPlanning()
 {
-    // Producers plan first; predators only see current prey positions, not producer plans.
     for (auto& organism : world->getOrganisms()) {
-        if (!organism || !organism->getIsAlive()) continue;
+        if (!organism) continue;
+        if (!organism->getIsAlive()) continue;
 
         try {
-            if (dynamic_cast<Producer*>(organism.get())) {
-                organism->planMove(world);
-            }
+            organism->planMove(world);
         } catch (...) {
-        }
-    }
 
-    for (auto& organism : world->getOrganisms()) {
-        if (!organism || !organism->getIsAlive()) continue;
-
-        try {
-            if (dynamic_cast<Predator*>(organism.get()) ||
-                dynamic_cast<Omnivore*>(organism.get())) {
-                organism->planMove(world);
-            }
-        } catch (...) {
         }
     }
 }
@@ -78,48 +62,14 @@ void SimEngine::processMovementPlanning()
 void SimEngine::processMovementExecution()
 {
     for (auto& organism : world->getOrganisms()) {
-        if (!organism || !organism->getIsAlive()) continue;
+        if (!organism) continue;
+        if (!organism->getIsAlive()) continue;
 
         try {
             organism->executeMovement(world);
-        } catch (...) {
+        } catch (...){
+
         }
-    }
-}
-
-static void processHunterInteractions(World* world, Organism* hunter, int vision, bool skipPredatorPrey)
-{
-    if (!world || !hunter) {
-        return;
-    }
-
-    const Position pos = hunter->getPosition();
-    Organism* closestPrey = nullptr;
-    double closestDist = 999999.0;
-
-    for (const auto& other : world->getOrganisms()) {
-        if (!other || !other->getIsAlive()) continue;
-        if (other.get() == hunter) continue;
-        if (hunter->isDirectKin(other.get())) continue;
-        if (skipPredatorPrey && dynamic_cast<Predator*>(other.get())) continue;
-
-        const Position otherPos = other->getPosition();
-        const double dist = std::abs(pos.x - otherPos.x) + std::abs(pos.y - otherPos.y);
-
-        if (dist <= vision && dist < closestDist) {
-            closestDist = dist;
-            closestPrey = other.get();
-        }
-    }
-
-    if (!closestPrey || closestDist > 1.5) {
-        return;
-    }
-
-    if (Predator* predator = dynamic_cast<Predator*>(hunter)) {
-        predator->attemptHunt(closestPrey);
-    } else if (Omnivore* omnivore = dynamic_cast<Omnivore*>(hunter)) {
-        omnivore->attemptHunt(closestPrey);
     }
 }
 
@@ -128,13 +78,35 @@ void SimEngine::processInteractions()
     for (const auto& organism : world->getOrganisms()) {
         if (!organism || !organism->getIsAlive()) continue;
 
+        Predator* pred = dynamic_cast<Predator*>(organism.get());
+        if (!pred) continue;
+
         try {
-            if (Predator* pred = dynamic_cast<Predator*>(organism.get())) {
-                processHunterInteractions(world, pred, pred->getVision(), true);
-            } else if (Omnivore* omni = dynamic_cast<Omnivore*>(organism.get())) {
-                processHunterInteractions(world, omni, omni->getVision(), false);
+            Position pos = pred->getPosition();
+            int vision = pred->getVision();
+
+            Organism* closestPrey = nullptr;
+            double closestDist = 999999.0;
+
+            for (const auto& other : world->getOrganisms()) {
+                if (!other || !other->getIsAlive()) continue;
+                if (other.get() == pred) continue;
+                if (dynamic_cast<Predator*>(other.get())) continue;
+
+                Position otherPos = other->getPosition();
+                double dist = std::abs(pos.x - otherPos.x) + std::abs(pos.y - otherPos.y);
+
+                if (dist <= vision && dist < closestDist) {
+                    closestDist = dist;
+                    closestPrey = other.get();
+                }
+            }
+
+            if (closestPrey && closestDist <= 1.5) {
+                pred->hunt(closestPrey);
             }
         } catch (...) {
+
         }
     }
 }
@@ -142,7 +114,8 @@ void SimEngine::processInteractions()
 void SimEngine::processTileEffects()
 {
     for (const auto& organism : world->getOrganisms()) {
-        if (!organism || !organism->getIsAlive()) continue;
+        if (!organism) continue;
+        if (!organism->getIsAlive()) continue;
 
         try {
             Tile* tile = world->getTile(organism->getPosition());
@@ -150,6 +123,7 @@ void SimEngine::processTileEffects()
                 tile->applyEffect(organism.get());
             }
         } catch (...) {
+
         }
     }
 }
@@ -157,11 +131,13 @@ void SimEngine::processTileEffects()
 void SimEngine::processEnergy()
 {
     for (const auto& organism : world->getOrganisms()) {
-        if (!organism || !organism->getIsAlive()) continue;
+        if (!organism) continue;
+        if (organism->getIsAlive()) {
+            try {
+                organism->onTick(world);
+            } catch (...) {
 
-        try {
-            organism->onTick(world);
-        } catch (...) {
+            }
         }
     }
 }
@@ -170,10 +146,8 @@ void SimEngine::processReproduction()
 {
     std::vector<std::unique_ptr<Organism>> newborns;
 
-    int producers = 0;
-    int predators = 0;
-    int thermophiles = 0;
-    int cryophiles = 0;
+    // Policz populacje
+    int producers = 0, predators = 0, thermophiles = 0, cryophiles = 0;
     int totalAlive = 0;
 
     for (const auto& org : world->getOrganisms()) {
@@ -185,16 +159,16 @@ void SimEngine::processReproduction()
             producers++;
         } else if (dynamic_cast<Predator*>(org.get())) {
             predators++;
-        }
-
-        if (org->getTemperaturePreference() == TemperaturePreference::Thermophile) {
+        } else if (dynamic_cast<Thermophile*>(org.get())) {
             thermophiles++;
-        } else if (org->getTemperaturePreference() == TemperaturePreference::Cryophile) {
+        } else if (dynamic_cast<Cryophile*>(org.get())) {
             cryophiles++;
         }
     }
 
+
     if (totalAlive > 100) {
+        // Zabij losowe organizmy żeby zejść do 80
         int toKill = totalAlive - 80;
         int killed = 0;
 
@@ -211,39 +185,44 @@ void SimEngine::processReproduction()
         return;
     }
 
-    bool totalOverpop = totalAlive > 200;
-    bool producerOverpop = producers > 100;
-    bool predatorOverpop = predators > 20;
-    bool thermoOverpop = thermophiles > 100;
-    bool cryoOverpop = cryophiles > 100;
+    // Progi
+    bool totalOverpop = totalAlive > 50;
+    bool producerOverpop = producers > 25;
+    bool predatorOverpop = predators > 12;
+    bool thermoOverpop = thermophiles > 15;
+    bool cryoOverpop = cryophiles > 15;
 
+    // Kary za przeludnienie
     for (const auto& organism : world->getOrganisms()) {
         if (!organism || !organism->getIsAlive()) continue;
 
         try {
             double penalty = 0.0;
 
+            // Kara za przeludnienie SWOJEGO typu
             if (dynamic_cast<Producer*>(organism.get()) && producerOverpop) {
-                penalty += 2.0;
+                penalty += 3.0;
             }
             else if (dynamic_cast<Predator*>(organism.get()) && predatorOverpop) {
-                penalty += 3.5;
+                penalty += 4.0;
+            }
+            else if (dynamic_cast<Thermophile*>(organism.get()) && thermoOverpop) {
+                penalty += 3.0;
+            }
+            else if (dynamic_cast<Cryophile*>(organism.get()) && cryoOverpop) {
+                penalty += 3.0;
             }
 
-            if (organism->getTemperaturePreference() == TemperaturePreference::Thermophile && thermoOverpop) {
-                penalty += 3.0;
-            }
-            else if (organism->getTemperaturePreference() == TemperaturePreference::Cryophile && cryoOverpop) {
-                penalty += 3.0;
-            }
 
             if (totalOverpop) {
                 penalty += 2.0;
             }
 
+
             if (penalty > 0.0) {
                 organism->setEnergy(organism->getEnergy() - penalty);
             }
+
 
             if (organism->canReproduce()) {
                 auto child = organism->reproduce();
@@ -252,18 +231,17 @@ void SimEngine::processReproduction()
                 }
             }
         } catch (...) {
+
         }
     }
 
+    // Dodaj nowe organizmy
     for (auto& newborn : newborns) {
-        if (!newborn) continue;
-
-        Position chosen = newborn->findPlaceToBreed(world);
-        if (chosen.x >= 0) {
-            newborn->setPosition(chosen);
+        if (newborn) {
             try {
                 world->addOrganism(std::move(newborn));
             } catch (...) {
+
             }
         }
     }

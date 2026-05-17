@@ -7,11 +7,7 @@
       "baseAbundantWeight": 15,
       "basePoisonWeight": 2,
       "baseImpassableWeight": 3,
-      "clusterBonus": 150,
-      "baseTemperateWeight": 100,
-      "baseColdWeight": 10,
-      "baseWarmWeight": 10,
-      "temperatureClusterBonus": 120
+      "clusterBonus": 150
     }
   },
   "organisms": [
@@ -68,7 +64,7 @@
       "size": 2,
       "speed": 1,
       "maxAP": 1,
-      "temperaturePreference": "default"
+      "preferredTemperature": 20
     },
     {
       "type": "producer",
@@ -79,7 +75,7 @@
       "size": 2,
       "speed": 1,
       "maxAP": 1,
-      "temperaturePreference": "default"
+      "preferredTemperature": 20
     },
     {
       "type": "producer",
@@ -90,7 +86,7 @@
       "size": 2,
       "speed": 1,
       "maxAP": 1,
-      "temperaturePreference": "default"
+      "preferredTemperature": 20
     },
     {
       "type": "producer",
@@ -101,7 +97,7 @@
       "size": 2,
       "speed": 1,
       "maxAP": 1,
-      "temperaturePreference": "default"
+      "preferredTemperature": 20
     },
     {
       "type": "producer",
@@ -112,51 +108,47 @@
       "size": 2,
       "speed": 1,
       "maxAP": 1,
-      "temperaturePreference": "default"
+      "preferredTemperature": 20
     },
     {
-      "type": "producer",
+      "type": "thermophile",
       "x": 12,
       "y": 22,
       "startEnergy": 120,
       "maxEnergy": 200,
       "size": 2,
       "speed": 1,
-      "maxAP": 1,
-      "temperaturePreference": "thermophile"
+      "maxAP": 1
     },
     {
-      "type": "producer",
+      "type": "thermophile",
       "x": 28,
       "y": 8,
       "startEnergy": 120,
       "maxEnergy": 200,
       "size": 2,
       "speed": 1,
-      "maxAP": 1,
-      "temperaturePreference": "thermophile"
+      "maxAP": 1
     },
     {
-      "type": "producer",
+      "type": "cryophile",
       "x": 18,
       "y": 25,
       "startEnergy": 120,
       "maxEnergy": 200,
       "size": 2,
       "speed": 1,
-      "maxAP": 1,
-      "temperaturePreference": "cryophile"
+      "maxAP": 1
     },
     {
-      "type": "producer",
+      "type": "cryophile",
       "x": 38,
       "y": 18,
       "startEnergy": 120,
       "maxEnergy": 200,
       "size": 2,
       "speed": 1,
-      "maxAP": 1,
-      "temperaturePreference": "cryophile"
+      "maxAP": 1
     }
   ]
 }

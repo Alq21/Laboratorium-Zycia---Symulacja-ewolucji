@@ -2,7 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+
+#include <QTimer>
+// potem trzeba ten zegar usunąć
+
 #include "simulationapp.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,19 +22,17 @@ public:
     ~MainWindow() override;
 
 private slots:
+    void on_resumeButton_clicked();
     void on_startButton_clicked();
-    void on_pauseButton_clicked();
+    void on_stopButton_clicked();
+
     void on_stepButton_clicked();
-    void onTabChanged(int index);   // odswiezanie statystyk po zmianie zakladki
+    void on_pauseButton_clicked();
+
 
 private:
-    void updateControlButtons();
-    void refreshBoard();
-    void refreshStats();            // przekazuje dane do StatPanel
-
-    Ui::MainWindow* ui;
-    SimulationApp*  simApp;
-    QString         configPath;
+    Ui::MainWindow *ui;
+    SimulationApp *simApp;
 };
 
 #endif // MAINWINDOW_H

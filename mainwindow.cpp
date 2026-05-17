@@ -1,10 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "statpanel.h"
 #include <QFile>
 #include <iostream>
 
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -12,48 +11,30 @@ MainWindow::MainWindow(QWidget* parent)
 
     simApp = new SimulationApp(this);
 
-    // Wczytanie konfiguracji
-    configPath = QStringLiteral("example_config.json");
-    if (!QFile::exists(configPath))
-        configPath = QString(SOURCE_DIR) + QStringLiteral("/example_config.json");
+    // Załaduj config
+    QString configPath = "example_config.json";
+    if (!QFile::exists(configPath)) {
+        configPath = QString(SOURCE_DIR) + "/example_config.json";
+    }
 
     if (simApp->loadFromFile(configPath)) {
         std::cout << "Config loaded successfully!" << std::endl;
-        refreshBoard();
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
     } else {
         std::cout << "ERROR: " << simApp->lastError().toStdString() << std::endl;
     }
 
-    // Podpięcie widgetu planszy
+
     ui->boardWidget->setSimApp(simApp);
-    ui->boardWidget->setShowEnvironmentParameters(
-        ui->showEnvironmentCheckBox->isChecked());
 
-    connect(ui->showEnvironmentCheckBox, &QCheckBox::toggled, this,
-            [this](bool checked) {
-                ui->boardWidget->setShowEnvironmentParameters(checked);
-            });
 
-    // Sygnały SimulationApp → GUI
-    connect(simApp, &SimulationApp::tickCompleted, this, [this](long) {
-        refreshBoard();
+    connect(simApp, &SimulationApp::tickCompleted, this, [this](long tick){
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
     });
 
-    connect(simApp, &SimulationApp::simulationStarted,
-            this, &MainWindow::updateControlButtons);
-    connect(simApp, &SimulationApp::simulationStopped,
-            this, &MainWindow::updateControlButtons);
-    connect(simApp, &SimulationApp::simulationPaused,
-            this, &MainWindow::updateControlButtons);
-    connect(simApp, &SimulationApp::simulationResumed,
-            this, &MainWindow::updateControlButtons);
-
-    // Zmiana zakładki — odświeżamy statystyki gdy przełączamy na "Statystyki"
-    connect(ui->tabWidget, &QTabWidget::currentChanged,
-            this, &MainWindow::onTabChanged);
-
-    updateControlButtons();
-    resize(960, 820);
+    resize(900, 780);
 }
 
 MainWindow::~MainWindow()
@@ -61,82 +42,46 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-// ---------------------------------------------------------------------------
-void MainWindow::refreshBoard()
-{
-    ui->boardWidget->setSnapshot(simApp->collectSnapshot());
-}
-
-void MainWindow::refreshStats()
-{
-    ui->statsPanel->refresh(simApp->collectStats());
-}
-
-void MainWindow::updateControlButtons()
-{
-    const bool running = simApp && simApp->isRunning();
-    const bool paused  = simApp && simApp->isPaused();
-
-    ui->startButton->setText(running
-        ? QStringLiteral("Restart")
-        : QStringLiteral("Start"));
-    ui->pauseButton->setText(paused
-        ? QStringLiteral("Resume")
-        : QStringLiteral("Pause"));
-    ui->pauseButton->setEnabled(running);
-
-    // Gdy symulacja zapauzowana i jestesmy na zakladce Statystyki — odswiez
-    if (paused && ui->tabWidget->currentIndex() == 1)
-        refreshStats();
-}
-
-// ---------------------------------------------------------------------------
-void MainWindow::onTabChanged(int index)
-{
-    // index 1 == zakładka "Statystyki"
-    if (index == 1) {
-        refreshStats();
-    }
-}
-
-// ---------------------------------------------------------------------------
 void MainWindow::on_startButton_clicked()
 {
-    if (!simApp) return;
-
-    if (simApp->isRunning()) {
-        std::cout << "RESTART clicked" << std::endl;
-        simApp->restartSimulation(configPath);
-        refreshBoard();
-    } else {
+    if (simApp) {
         std::cout << "START clicked" << std::endl;
         simApp->startSimulation();
     }
-    updateControlButtons();
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    if (simApp) {
+        std::cout << "STOP clicked" << std::endl;
+        simApp->stopSimulation();
+    }
 }
 
 void MainWindow::on_pauseButton_clicked()
 {
-    if (!simApp || !simApp->isRunning()) return;
-
-    if (simApp->isPaused()) {
-        std::cout << "RESUME clicked" << std::endl;
-        simApp->resumeSimulation();
-    } else {
+    if (simApp) {
         std::cout << "PAUSE clicked" << std::endl;
         simApp->pauseSimulation();
     }
-    updateControlButtons();
+}
+
+void MainWindow::on_resumeButton_clicked()
+{
+    if (simApp) {
+        std::cout << "RESUME clicked" << std::endl;
+        simApp->resumeSimulation();
+    }
 }
 
 void MainWindow::on_stepButton_clicked()
 {
-    if (!simApp) return;
-    std::cout << "STEP clicked" << std::endl;
-    simApp->stepSimulation();
-    refreshBoard();
+    if (simApp) {
+        std::cout << "STEP clicked" << std::endl;
+        simApp->stepSimulation();
 
-    // Odśwież statystyki po kroku, jeśli zakładka Statystyki jest aktywna
-    if (ui->tabWidget->currentIndex() == 1)
-        refreshStats();
+        // Odśwież widok
+        auto entities = simApp->collectEntities();
+        ui->boardWidget->setEntities(entities);
+    }
 }

@@ -7,10 +7,6 @@ Position Entity::getPosition() const  {
     return position;
 }
 
-void Entity::setPosition(Position pos) {
-    position = pos;
-}
-
 Color Entity::getColor() const {
     return color;
 }
