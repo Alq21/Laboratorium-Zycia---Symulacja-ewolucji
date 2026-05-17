@@ -1,18 +1,33 @@
 #ifndef SIMULATIONAPP_H
 #define SIMULATIONAPP_H
 
+#include <QMutex>
 #include <QThread>
 #include <QString>
 #include <memory>
 #include <vector>
 #include <atomic>
+#include "boardsnapshot.h"
 #include "entity.h"
-// ogl tutaj cześć pozmieniałam by choDż troche gui od logiki odseparowąć, starałam sie nie usunąć za dużo twojego,możesz przejrzeć i nie potrzebne usunąć
 
 class World;
 class SimEngine;
 class StatManager;
 class SimulationBuilder;
+
+// Dane statystyk zwracane bezpiecznie (kopie spod muteksa)
+struct StatsData {
+    std::vector<long>   ticks;
+    std::vector<int>    predatorCounts;
+    std::vector<int>    producerCounts;
+    std::vector<int>    omnivoreCounts;
+    std::vector<int>    cryophileCounts;
+    std::vector<int>    thermophileCounts;
+    std::vector<int>    defaultCounts;
+    std::vector<double> avgSizes;
+    std::vector<double> avgSpeeds;
+    bool hasData = false;
+};
 
 class SimulationApp : public QThread
 {
@@ -25,27 +40,26 @@ public:
     SimulationApp(const SimulationApp&) = delete;
     SimulationApp& operator=(const SimulationApp&) = delete;
 
-
     bool loadFromFile(const QString& path);
 
     // Kontrola symulacji
     void startSimulation();
     void stopSimulation();
+    void restartSimulation(const QString& configPath);
     void pauseSimulation();
     void resumeSimulation();
-    void stepSimulation();  // Jeden krok
+    void stepSimulation();
 
-    // Dostęp do danych (dla GUI)
-    std::vector<Entity*> collectEntities() const;
-    double getInterpolation() const { return interpolation; }
+    // Dostep do danych (dla GUI)
+    BoardSnapshot collectSnapshot() const;
+    double getInterpolation() const { return interpolation.load(); }
 
-    // Dostęp do komponentów (dla step)
-    World* getWorld() const { return world.get(); }
-    SimEngine* getEngine() const { return engine.get(); }
+    // Dane statystyk — bezpieczna kopia spod muteksa
+    StatsData collectStats() const;
 
     // Status
     bool isRunning() const { return running; }
-    bool isPaused() const { return paused; }
+    bool isPaused()  const { return paused;  }
     long currentTick() const;
     QString lastError() const { return error; }
 
@@ -59,24 +73,22 @@ signals:
     void errorOccurred(const QString& message);
 
 protected:
-    void run() override;  // Główna pętla w wątku
+    void run() override;
 
 private:
-    // Komponenty symulacji
-    std::unique_ptr<World> world;
-    std::unique_ptr<SimEngine> engine;
-    std::unique_ptr<StatManager> stats;
+    std::unique_ptr<World>             world;
+    std::unique_ptr<SimEngine>         engine;
+    std::unique_ptr<StatManager>       stats;
     std::unique_ptr<SimulationBuilder> builder;
 
-    // Kontrola wątku
-    std::atomic<bool> running;
-    std::atomic<bool> paused;
+    std::atomic<bool>   running;
+    std::atomic<bool>   paused;
     std::atomic<double> interpolation;
 
-    int tickIntervalMs;
+    int     tickIntervalMs;
     QString error;
-
-    void emitPopulationUpdate();
+    QString loadedConfigPath;
+    mutable QMutex worldMutex;
 };
 
 #endif // SIMULATIONAPP_H

@@ -1,13 +1,17 @@
 {
   "world": {
-    "width": 80,
-    "height": 60,
+    "width": 100,
+    "height": 100,
     "mapConfig": {
       "baseNormalWeight": 100,
       "baseAbundantWeight": 12,
       "basePoisonWeight": 4,
       "baseImpassableWeight": 5,
-      "clusterBonus": 150
+      "clusterBonus": 150,
+      "baseTemperateWeight": 100,
+      "baseColdWeight": 10,
+      "baseWarmWeight": 10,
+      "temperatureClusterBonus": 120
     }
   },
   "organisms": [
@@ -39,7 +43,7 @@
       "size": 1,
       "speed": 1,
       "maxAP": 1,
-      "preferredTemperature": 20.0
+      "temperaturePreference": "default"
     },
     {
       "type": "producer",
@@ -49,7 +53,7 @@
       "size": 1,
       "speed": 1,
       "maxAP": 1,
-      "preferredTemperature": 20.0
+      "temperaturePreference": "default"
     },
     {
       "type": "producer",
@@ -59,43 +63,47 @@
       "size": 1,
       "speed": 1,
       "maxAP": 1,
-      "preferredTemperature": 20.0
+      "temperaturePreference": "default"
     },
     {
-      "type": "thermophile",
+      "type": "producer",
       "x": 15, "y": 45,
       "startEnergy": 100.0,
       "maxEnergy": 220.0,
       "size": 1,
       "speed": 1,
-      "maxAP": 1
+      "maxAP": 1,
+      "temperaturePreference": "thermophile"
     },
     {
-      "type": "thermophile",
+      "type": "producer",
       "x": 55, "y": 20,
       "startEnergy": 95.0,
       "maxEnergy": 215.0,
       "size": 1,
       "speed": 1,
-      "maxAP": 1
+      "maxAP": 1,
+      "temperaturePreference": "thermophile"
     },
     {
-      "type": "cryophile",
+      "type": "producer",
       "x": 35, "y": 10,
       "startEnergy": 95.0,
       "maxEnergy": 210.0,
       "size": 1,
       "speed": 1,
-      "maxAP": 1
+      "maxAP": 1,
+      "temperaturePreference": "cryophile"
     },
     {
-      "type": "cryophile",
+      "type": "producer",
       "x": 65, "y": 35,
       "startEnergy": 100.0,
       "maxEnergy": 215.0,
       "size": 1,
       "speed": 1,
-      "maxAP": 1
+      "maxAP": 1,
+      "temperaturePreference": "cryophile"
     }
   ]
 }

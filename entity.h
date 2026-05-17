@@ -19,6 +19,7 @@ public:
     virtual ~Entity() = default;
 
     Position getPosition() const;
+    void setPosition(Position pos);
     Color getColor() const ;
 };
 
