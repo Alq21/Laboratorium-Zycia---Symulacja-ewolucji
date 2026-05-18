@@ -23,6 +23,12 @@
     </property>
     <item>
      <widget class="QWidget" name="leftPanel" native="true">
+      <property name="maximumSize">
+       <size>
+        <width>300</width>
+        <height>1000</height>
+       </size>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QGroupBox" name="controlGroup">
@@ -188,17 +194,7 @@ Brak</string>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Orientation::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
+        <widget class="QPlainTextEdit" name="plainTextEdit"/>
        </item>
       </layout>
      </widget>
@@ -268,6 +264,20 @@ Brak</string>
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>startButton</tabstop>
+  <tabstop>pauseButton</tabstop>
+  <tabstop>showEnvironmentCheckBox</tabstop>
+  <tabstop>tempSlider</tabstop>
+  <tabstop>humiditySlider</tabstop>
+  <tabstop>stepButton</tabstop>
+  <tabstop>sunlightSlider</tabstop>
+  <tabstop>heatwaveButton</tabstop>
+  <tabstop>freezeButton</tabstop>
+  <tabstop>droughtButton</tabstop>
+  <tabstop>stormButton</tabstop>
+  <tabstop>tabWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
