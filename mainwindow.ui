@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
+    <width>1100</width>
     <height>820</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Lab of Life</string>
+   <string>Lab of Life - Laboratorium Życia</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="mainLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <property name="spacing">
      <number>6</number>
     </property>
@@ -22,55 +22,186 @@
      <number>8</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="controlLayout">
-      <property name="margin" stdset="0">
-       <number>0</number>
-      </property>
-      <item>
-       <widget class="QPushButton" name="stepButton">
-        <property name="text">
-         <string>Krok</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="startButton">
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pauseButton">
-        <property name="text">
-         <string>Pauza</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="showEnvironmentCheckBox">
-        <property name="text">
-         <string>Pokaż temperaturę</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+     <widget class="QWidget" name="leftPanel" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QGroupBox" name="controlGroup">
+         <property name="title">
+          <string>Sterowanie</string>
+         </property>
+         <layout class="QVBoxLayout" name="controlLayout">
+          <item>
+           <widget class="QPushButton" name="stepButton">
+            <property name="text">
+             <string>Krok</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="startButton">
+            <property name="text">
+             <string>Start</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pauseButton">
+            <property name="text">
+             <string>Pauza</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="showEnvironmentCheckBox">
+            <property name="text">
+             <string>Pokaż temperaturę</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="environmentGroup">
+         <property name="title">
+          <string>Parametry środowiska</string>
+         </property>
+         <layout class="QVBoxLayout" name="envLayout">
+          <item>
+           <widget class="QLabel" name="tempLabel">
+            <property name="text">
+             <string>Temperatura: 20°C</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="tempSlider">
+            <property name="minimum">
+             <number>-20</number>
+            </property>
+            <property name="maximum">
+             <number>50</number>
+            </property>
+            <property name="value">
+             <number>20</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="humidityLabel">
+            <property name="text">
+             <string>Wilgotność: 50%</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="humiditySlider">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>50</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="sunlightLabel">
+            <property name="text">
+             <string>Nasłonecznienie: 50%</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="sunlightSlider">
+            <property name="minimum">
+             <number>0</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>50</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="eventsGroup">
+         <property name="title">
+          <string>Wydarzenia klimatyczne</string>
+         </property>
+         <layout class="QVBoxLayout" name="eventsLayout">
+          <item>
+           <widget class="QPushButton" name="heatwaveButton">
+            <property name="text">
+             <string>Fala upałów</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="freezeButton">
+            <property name="text">
+             <string>Mróz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="droughtButton">
+            <property name="text">
+             <string>Susza</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stormButton">
+            <property name="text">
+             <string>Burza</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="activeEventsLabel">
+            <property name="text">
+             <string>Aktywne wydarzenia:
+Brak</string>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <widget class="QTabWidget" name="tabWidget">
@@ -116,8 +247,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>960</width>
-     <height>22</height>
+     <width>1100</width>
+     <height>21</height>
     </rect>
    </property>
   </widget>

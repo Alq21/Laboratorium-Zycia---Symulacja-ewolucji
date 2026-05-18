@@ -2,6 +2,7 @@
 #define SIMENGINE_H
 
 #include "simulationstatus.h"
+#include "climateevents.h"  // DODANE: dla wydarzeń klimatycznych
 
 class World;
 class StatManager;
@@ -13,6 +14,7 @@ private:
 
     long currentTick;
     SimulationStatus status;
+    ClimateEvents climateEvents;  // DODANE: zarządzanie wydarzeniami klimatycznymi
 
     // Fazy symulacji:
     void processMovementPlanning();
@@ -37,6 +39,7 @@ public:
     long getCurrentTick() const;
     SimulationStatus getStatus() const;
     bool isPaused() const;
+    ClimateEvents* getClimateEvents() { return &climateEvents; }  // DODANE: dostęp do wydarzeń
 
     // Rule of 5:
     SimEngine(const SimEngine&) = delete;

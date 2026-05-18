@@ -26,7 +26,12 @@ void applyTemperatureBiome(Tile* tile, double temperatureModifier) {
 }
 }
 
-World::World(int w, int h, MapConfig config) : width(w), height(h) {
+World::World(int w, int h, MapConfig config) 
+    : width(w), 
+      height(h),
+      globalParameters(20.0, 50.0, 50.0),  // DODANE: domyślne parametry
+      eventModifiers(0.0, 0.0, 0.0)        // DODANE: brak wydarzeń na start
+{
     std::srand(std::time(nullptr));
     habitat.resize(height);
     generateMap(config);
@@ -238,13 +243,19 @@ void World::removeDead() {
 void World::setGlobalParameters(EnvironmentParameters parameters) {
     globalParameters = parameters;
 }
+
+// DODANE: ustawia zmiany z wydarzeń klimatycznych
+void World::setEventModifiers(EnvironmentParameters modifiers) {
+    eventModifiers = modifiers;
+}
+
 EnvironmentParameters World::getCombinedParameters(Position pos) const {
     Tile* tile = getTile(pos);
     if (tile != nullptr) {
-        // GLOBALNE + LOKALNE = RZECZYWISTE W
-        return globalParameters + tile->getLocalModifiers();
+        // ZMIENIONE: GLOBALNE + LOKALNE + WYDARZENIA = RZECZYWISTE
+        return globalParameters + tile->getLocalModifiers() + eventModifiers;
     }
-    // Jeśli z jakiegoś powodu jesteśmy poza mapą, zwracamy tylko globalne
-    return globalParameters;
+    // Jeśli z jakiegoś powodu jesteśmy poza mapą, zwracamy tylko globalne + wydarzenia
+    return globalParameters + eventModifiers;
 }
 World::~World() = default;

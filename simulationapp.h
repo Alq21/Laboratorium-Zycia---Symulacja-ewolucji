@@ -62,6 +62,9 @@ public:
     bool isPaused()  const { return paused;  }
     long currentTick() const;
     QString lastError() const { return error; }
+    
+    // DODANE: Dostęp do silnika (dla GUI)
+    SimEngine* getEngine() const;
 
 signals:
     void tickCompleted(long tick);

@@ -311,3 +311,8 @@ void SimulationApp::run()
 
     std::cout << "=== WATEK ZATRZYMANY ===" << std::endl;
 }
+
+// DODANE: Dostęp do silnika symulacji (dla GUI)
+SimEngine* SimulationApp::getEngine() const {
+    return engine.get();
+}

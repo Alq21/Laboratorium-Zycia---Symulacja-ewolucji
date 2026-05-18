@@ -1,6 +1,8 @@
 #include "mainwindow.h"
+#include "simengine.h"
 #include "ui_mainwindow.h"
 #include "statpanel.h"
+#include "climateevents.h"  // DODANE: dla ClimateEventType
 #include <QFile>
 #include <iostream>
 
@@ -139,4 +141,57 @@ void MainWindow::on_stepButton_clicked()
     // Odśwież statystyki po kroku, jeśli zakładka Statystyki jest aktywna
     if (ui->tabWidget->currentIndex() == 1)
         refreshStats();
+}
+
+// ========== DODANE: Implementacje slotów dla parametrów i wydarzeń ==========
+
+void MainWindow::on_tempSlider_valueChanged(int value) {
+    ui->tempLabel->setText(QString("Temperatura: ").arg(value));
+}
+
+void MainWindow::on_humiditySlider_valueChanged(int value) {
+    ui->humidityLabel->setText(QString("Wilgotność:").arg(value));
+}
+
+void MainWindow::on_sunlightSlider_valueChanged(int value) {
+    ui->sunlightLabel->setText(QString("Nasłonecznienie:").arg(value));
+}
+
+// void MainWindow::on_autoEventsCheckBox_toggled(bool checked) {
+//     if (simApp && simApp->getEngine()) {
+//         simApp->getEngine()->getClimateEvents()->setAutoEnabled(checked);
+//         std::cout << "Auto wydarzenia: " << (checked ? "ON" : "OFF") << std::endl;
+//     }
+// }
+
+void MainWindow::on_heatwaveButton_clicked() {
+    if (simApp && simApp->getEngine()) {
+        simApp->getEngine()->getClimateEvents()->trigger(ClimateEventType::Heatwave);
+        std::cout << "Wywołano FALĘ UPAŁÓW!" << std::endl;
+        refreshBoard();
+    }
+}
+
+void MainWindow::on_freezeButton_clicked() {
+    if (simApp && simApp->getEngine()) {
+        simApp->getEngine()->getClimateEvents()->trigger(ClimateEventType::Freeze);
+        std::cout << "Wywołano MRÓZ!" << std::endl;
+        refreshBoard();
+    }
+}
+
+void MainWindow::on_droughtButton_clicked() {
+    if (simApp && simApp->getEngine()) {
+        simApp->getEngine()->getClimateEvents()->trigger(ClimateEventType::Drought);
+        std::cout << "Wywołano SUSZĘ!" << std::endl;
+        refreshBoard();
+    }
+}
+
+void MainWindow::on_stormButton_clicked() {
+    if (simApp && simApp->getEngine()) {
+        simApp->getEngine()->getClimateEvents()->trigger(ClimateEventType::Storm);
+        std::cout << "Wywołano BURZĘ!" << std::endl;
+        refreshBoard();
+    }
 }

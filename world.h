@@ -30,6 +30,7 @@ private:
     std::vector<std::unique_ptr<Organism>> organisms;
     void generateMap(const MapConfig& config);
     EnvironmentParameters globalParameters;
+    EnvironmentParameters eventModifiers;  // DODANE: zmiany z wydarzeń klimatycznych
 
     // Pozycje organizmow, ktore zginely w tym ticku
     std::vector<Position> recentDeaths_;
@@ -61,6 +62,7 @@ public:
     World& operator=(const World&) = delete;
 
     void setGlobalParameters(EnvironmentParameters parameters);
+    void setEventModifiers(EnvironmentParameters modifiers);  // DODANE: ustaw zmiany z wydarzeń
     EnvironmentParameters getCombinedParameters(Position pos) const;
 
     template<typename T>

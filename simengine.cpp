@@ -25,6 +25,10 @@ void SimEngine::step()
         return;
 
     try {
+        // DODANE: Aktualizuj wydarzenia klimatyczne (pierwsza faza)
+        climateEvents.update();
+        world->setEventModifiers(climateEvents.getTotalModifiers());
+        
         processEnergy();
         processMovementPlanning();
         processMovementExecution();
