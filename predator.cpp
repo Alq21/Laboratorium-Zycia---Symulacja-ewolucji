@@ -257,9 +257,21 @@ std::unique_ptr<Organism> Predator::reproduce()
         return mutant;
     }
 
+    // Mutacja preferencji temperaturowej (5% szansy)
+    TemperaturePreference childTempPref = temperaturePreference;
+    if (rand() % 100 < TypeMutationChancePercent) {
+        int roll = rand() % 2;
+        if (temperaturePreference == TemperaturePreference::Default)
+            childTempPref = (roll == 0) ? TemperaturePreference::Cryophile : TemperaturePreference::Thermophile;
+        else if (temperaturePreference == TemperaturePreference::Cryophile)
+            childTempPref = (roll == 0) ? TemperaturePreference::Default : TemperaturePreference::Thermophile;
+        else
+            childTempPref = (roll == 0) ? TemperaturePreference::Default : TemperaturePreference::Cryophile;
+    }
+
     auto child = std::make_unique<Predator>(
         childPos, childColor, childEnergy, childMaxEn, childSize, childSpeed,
-        maxActionPoints, generation + 1, childVision, temperaturePreference
+        maxActionPoints, generation + 1, childVision, childTempPref
         );
     child->initLineageFromParent(this);
     return child;

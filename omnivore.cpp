@@ -193,21 +193,16 @@ std::unique_ptr<Organism> Omnivore::reproduce()
     }
 
     if (rand() % 100 < TypeMutationChancePercent) {
-        const int roll = rand() % 3;
         std::unique_ptr<Organism> mutant;
-        if (roll == 0) {
+        // Tylko mutacja w inny typ (Producer lub Predator) — 50/50
+        if (rand() % 2 == 0) {
             mutant = std::make_unique<Producer>(
                 childPos, Color{255, 220, 50}, childEnergy, childMaxEn,
                 childSize, std::max(1, childSpeed - 1), maxActionPoints,
                 generation + 1, temperaturePreference);
-        } else if (roll == 1) {
+        } else {
             mutant = std::make_unique<Predator>(
                 childPos, Color{255, 50, 50}, childEnergy, childMaxEn,
-                childSize, childSpeed, maxActionPoints, generation + 1,
-                childVision, temperaturePreference);
-        } else {
-            mutant = std::make_unique<Omnivore>(
-                childPos, Color{200, 160, 220}, childEnergy, childMaxEn,
                 childSize, childSpeed, maxActionPoints, generation + 1,
                 childVision, temperaturePreference);
         }
@@ -215,10 +210,22 @@ std::unique_ptr<Organism> Omnivore::reproduce()
         return mutant;
     }
 
+    // Mutacja preferencji temperaturowej (5% szansy)
+    TemperaturePreference childTempPref = temperaturePreference;
+    if (rand() % 100 < TypeMutationChancePercent) {
+        int roll = rand() % 2;
+        if (temperaturePreference == TemperaturePreference::Default)
+            childTempPref = (roll == 0) ? TemperaturePreference::Cryophile : TemperaturePreference::Thermophile;
+        else if (temperaturePreference == TemperaturePreference::Cryophile)
+            childTempPref = (roll == 0) ? TemperaturePreference::Default : TemperaturePreference::Thermophile;
+        else
+            childTempPref = (roll == 0) ? TemperaturePreference::Default : TemperaturePreference::Cryophile;
+    }
+
     auto child = std::make_unique<Omnivore>(
         childPos, childColor, childEnergy, childMaxEn,
         childSize, childSpeed, maxActionPoints, generation + 1,
-        childVision, temperaturePreference);
+        childVision, childTempPref);
     child->initLineageFromParent(this);
     return child;
 }

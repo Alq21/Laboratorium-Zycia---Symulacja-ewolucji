@@ -144,6 +144,18 @@ std::unique_ptr<Organism> Producer::reproduce()
         return mutant;
     }
 
+    // Mutacja preferencji temperaturowej (5% szansy)
+    TemperaturePreference childTempPref = temperaturePreference;
+    if (rand() % 100 < TypeMutationChancePercent) {
+        int roll = rand() % 2;
+        if (temperaturePreference == TemperaturePreference::Default)
+            childTempPref = (roll == 0) ? TemperaturePreference::Cryophile : TemperaturePreference::Thermophile;
+        else if (temperaturePreference == TemperaturePreference::Cryophile)
+            childTempPref = (roll == 0) ? TemperaturePreference::Default : TemperaturePreference::Thermophile;
+        else
+            childTempPref = (roll == 0) ? TemperaturePreference::Default : TemperaturePreference::Cryophile;
+    }
+
     auto child = std::make_unique<Producer>(
         childPos,
         childColor,
@@ -153,7 +165,7 @@ std::unique_ptr<Organism> Producer::reproduce()
         speed,
         maxActionPoints,
         generation + 1,
-        temperaturePreference
+        childTempPref
         );
     child->initLineageFromParent(this);
     return child;

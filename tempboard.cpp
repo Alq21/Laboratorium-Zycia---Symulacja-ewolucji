@@ -129,6 +129,13 @@ void TempBoard::drawDeathParticle(QPainter& p, const DeathParticle& dp) const
 }
 
 // ---------------------------------------------------------------------------
+QSize TempBoard::sizeHint() const
+{
+    if (snapshot.isEmpty()) return QSize(400, 300);
+    return QSize(snapshot.width * tileSize, snapshot.height * tileSize);
+}
+
+// ---------------------------------------------------------------------------
 void TempBoard::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
@@ -144,6 +151,14 @@ void TempBoard::paintEvent(QPaintEvent*)
         p.drawRect(rect().adjusted(1, 1, -1, -1));
         return;
     }
+
+    // Wyśrodkowanie planszy w widgecie
+    const int boardW   = snapshot.width  * tileSize;
+    const int boardH   = snapshot.height * tileSize;
+    const int offsetX  = std::max(0, (width()  - boardW) / 2);
+    const int offsetY  = std::max(0, (height() - boardH) / 2);
+
+    p.translate(offsetX, offsetY);
 
     // ------------------------------------------------------------------
     // Płytki
@@ -258,8 +273,7 @@ void TempBoard::paintEvent(QPaintEvent*)
     // Ramka planszy
     // ------------------------------------------------------------------
     {
-        // Gradient ramki — jaśniejsza u góry/lewej, ciemniejsza u dołu/prawej
-        const QRect bdr = rect().adjusted(0, 0, -1, -1);
+        const QRect bdr = QRect(0, 0, boardW, boardH).adjusted(0, 0, -1, -1);
         p.setBrush(Qt::NoBrush);
 
         // Zewnętrzna ramka — gruba, ciemna

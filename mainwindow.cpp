@@ -18,10 +18,10 @@ MainWindow::MainWindow(QWidget* parent)
         configPath = QString(SOURCE_DIR) + QStringLiteral("/example_config.json");
 
     if (simApp->loadFromFile(configPath)) {
-        std::cout << "Config loaded successfully!" << std::endl;
+        std::cout << "Konfiguracja zaladowana pomyslnie!" << std::endl;
         refreshBoard();
     } else {
-        std::cout << "ERROR: " << simApp->lastError().toStdString() << std::endl;
+        std::cout << "BLAD: " << simApp->lastError().toStdString() << std::endl;
     }
 
     // Podpięcie widgetu planszy
@@ -81,8 +81,8 @@ void MainWindow::updateControlButtons()
         ? QStringLiteral("Restart")
         : QStringLiteral("Start"));
     ui->pauseButton->setText(paused
-        ? QStringLiteral("Resume")
-        : QStringLiteral("Pause"));
+        ? QStringLiteral("Wznów")
+        : QStringLiteral("Pauza"));
     ui->pauseButton->setEnabled(running);
 
     // Gdy symulacja zapauzowana i jestesmy na zakladce Statystyki — odswiez
@@ -105,11 +105,11 @@ void MainWindow::on_startButton_clicked()
     if (!simApp) return;
 
     if (simApp->isRunning()) {
-        std::cout << "RESTART clicked" << std::endl;
+        std::cout << "RESTART klikniety" << std::endl;
         simApp->restartSimulation(configPath);
         refreshBoard();
     } else {
-        std::cout << "START clicked" << std::endl;
+        std::cout << "START klikniety" << std::endl;
         simApp->startSimulation();
     }
     updateControlButtons();
@@ -120,10 +120,10 @@ void MainWindow::on_pauseButton_clicked()
     if (!simApp || !simApp->isRunning()) return;
 
     if (simApp->isPaused()) {
-        std::cout << "RESUME clicked" << std::endl;
+        std::cout << "WZNOW klikniety" << std::endl;
         simApp->resumeSimulation();
     } else {
-        std::cout << "PAUSE clicked" << std::endl;
+        std::cout << "PAUZA klikniety" << std::endl;
         simApp->pauseSimulation();
     }
     updateControlButtons();
@@ -132,7 +132,7 @@ void MainWindow::on_pauseButton_clicked()
 void MainWindow::on_stepButton_clicked()
 {
     if (!simApp) return;
-    std::cout << "STEP clicked" << std::endl;
+    std::cout << "KROK klikniety" << std::endl;
     simApp->stepSimulation();
     refreshBoard();
 

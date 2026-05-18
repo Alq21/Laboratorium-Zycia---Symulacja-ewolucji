@@ -27,6 +27,8 @@ public:
     void setSimApp(SimulationApp* app) { simApp = app; }
     void setShowEnvironmentParameters(bool show);
     bool showEnvironmentParameters() const { return showEnvironment; }
+    QSize sizeHint() const override;
+    void setWorldSize(int width, int height);
 
 protected:
     void paintEvent(QPaintEvent* event) override;
@@ -38,10 +40,11 @@ private:
     void drawDeathParticle(QPainter& p, const DeathParticle& dp) const;
 
     BoardSnapshot snapshot;
-    int tileSize = 20;
+    int tileSize = 24;
     SimulationApp* simApp = nullptr;
     bool showEnvironment  = false;
-
+    int worldWidth = 80;
+int worldHeight = 60;
     // Animacja śmierci
     QList<DeathParticle> deathParticles_;
     QTimer*              animTimer_;

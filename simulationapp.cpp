@@ -52,7 +52,7 @@ bool SimulationApp::loadFromFile(const QString& path)
 
     loadedConfigPath = path;
 
-    std::cout << "\n=== CONFIG LOADED ===" << std::endl;
+    std::cout << "\n=== KONFIGURACJA ZALADOWANA ===" << std::endl;
     std::cout << "Organizmy: " << collectSnapshot().organisms.size() << std::endl;
 
     return true;
@@ -244,7 +244,7 @@ StatsData SimulationApp::collectStats() const
 
 void SimulationApp::run()
 {
-    std::cout << "\n=== WATEK ROZPOCZETY ===" << std::endl;
+    std::cout << "\n=== WATEK URUCHOMIONY ===" << std::endl;
 
     while (running) {
         if (paused) {
@@ -309,5 +309,5 @@ void SimulationApp::run()
         }
     }
 
-    std::cout << "=== WATEK WSTRZYMANY ===" << std::endl;
+    std::cout << "=== WATEK ZATRZYMANY ===" << std::endl;
 }
